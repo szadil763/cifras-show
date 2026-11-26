@@ -271,6 +271,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
       <span class="web-q">Procurar <b id="web-termo"></b> na internet:</span>
       <a class="btn" id="web-cc" target="_blank" rel="noopener">No Cifra Club</a>
       <a class="btn" id="web-g" target="_blank" rel="noopener">No Google</a>
+      <span class="web-q" id="web-dica" hidden style="white-space:normal">Mais rápido: na página da cifra, toque e segure, escolha <b>Selecionar tudo</b> e depois <b>Compartilhar → Cifra no Palco</b>.</span>
     </div>
     <ul class="list" id="lista"></ul>
     <p class="hint" id="versao" style="margin-top:24px;text-align:center"></p>
@@ -735,7 +736,7 @@ function montarSequencia(m, extras){
 }
 
 /* ---------- Colar inteligente: limpa e organiza uma cifra copiada da internet ---------- */
-const LIXO_RE = /^(publicidade|an[uú]ncio|patrocinado|cifra ?club|cifraclub\.com\.br|imprimir|enviar|corrigir|salvar|favoritar|compartilhar|exibir cifra.*|simplificar( cifra)?|cifra simplificada|auto ?rolagem|rolagem autom[aá]tica|texto|dicion[aá]rio|tom|afinador|videoaula.*|ver (mais|todas|v[ií]deo).*|aprenda.*|baixe.*|assine.*|seja pro.*|pro|mostrar.*|ocultar.*|voltar ao topo|\d[\d.,]*\s*(mil\s*)?(exibi[cç][oõ]es|views|visualiza[cç][oõ]es)|enviada por.*|revisad[ao] por.*|vers[aã]o \d+ de \d+|principal|tablatura|cifra|letra|acordes|diagramas?|mudar tom|meio tom( acima| abaixo)?|[-+]\s*(½|1\/2)?\s*tom|[-+]|login|entrar|cadastre-se|sobre|ouvir|play|tocar|repetir|instrumento:?.*|viol[aã]o|guitarra|cavaco|ukulele|teclado|baixo|capo|★+|☆+|\d(\.\d)?\s*\/\s*5|[A-G][#b]?\S*\s*[:=]\s*[x\d]{6}|[x\d ]{6,11})$/i;
+const LIXO_RE = /^(buscar|pesquisar|menu|in[ií]cio|home|fechar|voltar|publicidade|an[uú]ncio|patrocinado|cifra ?club|cifraclub\.com\.br|imprimir|enviar|corrigir|salvar|favoritar|compartilhar|exibir cifra.*|simplificar( cifra)?|cifra simplificada|auto ?rolagem|rolagem autom[aá]tica|texto|dicion[aá]rio|tom|afinador|videoaula.*|ver (mais|todas|v[ií]deo).*|aprenda.*|baixe.*|assine.*|seja pro.*|pro|mostrar.*|ocultar.*|voltar ao topo|\d[\d.,]*\s*(mil\s*)?(exibi[cç][oõ]es|views|visualiza[cç][oõ]es)|enviada por.*|revisad[ao] por.*|vers[aã]o \d+ de \d+|principal|tablatura|cifra|letra|acordes|diagramas?|mudar tom|meio tom( acima| abaixo)?|[-+]\s*(½|1\/2)?\s*tom|[-+]|login|entrar|cadastre-se|sobre|ouvir|play|tocar|repetir|instrumento:?.*|viol[aã]o|guitarra|cavaco|ukulele|teclado|baixo|capo|★+|☆+|\d(\.\d)?\s*\/\s*5|[A-G][#b]?\S*\s*[:=]\s*[x\d]{6}|[x\d ]{6,11})$/i;
 const FIM_RE = /^(composi[cç][aã]o( de| por)?\b|colabora[cç][aã]o e revis[aã]o|coment[aá]rios\b|\d+\s+coment[aá]rios|videoaulas?\b|veja tamb[eé]m|mais (m[uú]sicas|cifras|tocadas)\b|outras m[uú]sicas|m[uú]sicas relacionadas|playlists?\b)/i;
 const SECAO_RE = /^\s*[\[(]?\s*(intro(?:du[cç][aã]o)?|refr[aã]o(?:\s*\d+)?|pr[eé][- ]?refr[aã]o|ponte|solo|final|primeira parte|segunda parte|terceira parte|parte \d+|verso(?:\s*\d+)?|estrofe(?:\s*\d+)?|interl[uú]dio|passagem|riff|outro)\s*[\])]?\s*:?\s*(.*)$/i;
 
@@ -1127,10 +1128,12 @@ async function colarDoClipboard(){
   }
 }
 function mostrarErroColar(msg){ const e = $("colar-erro"); e.textContent = msg; e.hidden = false; }
-function organizarColado(){
+function organizarColado(extra){
   const bruto = $("colar-txt").value;
   if (!bruto.trim()){ mostrarErroColar("Cole a cifra no campo antes de organizar."); return; }
-  const r = limparCifra(bruto, buscaWeb?.q || "");
+  const r = limparCifra(bruto, extra?.titulo || buscaWeb?.q || "");
+  // O título da página compartilhada é mais confiável que as primeiras linhas copiadas.
+  if (extra?.titulo){ r.titulo = extra.titulo; r.artista = extra.artista || (r.artista !== extra.titulo ? r.artista : ""); }
   if (!r.texto.trim()){ mostrarErroColar("Não encontrei uma cifra nesse texto. Confira se copiou a parte com os acordes e a letra."); return; }
   $("colar").hidden = true; buscaWeb = null;
   const partes = [];
@@ -1142,7 +1145,34 @@ function organizarColado(){
 $("colar-fechar").onclick = () => { ctlColar?.abort(); $("colar").hidden = true; };
 $("colar-zero").onclick = () => { $("colar").hidden = true; abrirEditor(null); };
 $("colar-clip").onclick = colarDoClipboard;
-$("colar-ok").onclick = organizarColado;
+$("colar-ok").onclick = () => organizarColado();
+
+/* ---------- Receber cifra pelo menu Compartilhar do Android ---------- */
+// O título da página costuma vir como "Música - Artista - Cifra Club".
+function lerTituloPagina(t){
+  const partes = String(t || "").split(/\s+[-–|]\s+/).map((x) => x.trim()).filter(Boolean)
+    .filter((x) => !/^(cifra ?club|cifras?|letras?(\.mus\.br)?|ultimate guitar|vagalume|tabs?)$/i.test(x) && !/^(cifra|letra|tablatura)\b/i.test(x));
+  return { titulo: (partes[0] || "").slice(0, 120), artista: (partes[1] || "").slice(0, 120) };
+}
+function receberCompartilhado(){
+  let q;
+  try { q = new URLSearchParams(location.search); } catch { return; }
+  if (!q.has("compartilhado_texto") && !q.has("compartilhado_link") && !q.has("compartilhado_titulo")) return;
+  const texto = q.get("compartilhado_texto") || "", link = q.get("compartilhado_link") || "", titulo = q.get("compartilhado_titulo") || "";
+  try { history.replaceState(null, "", location.pathname); } catch {}
+  // Alguns navegadores mandam o link junto no texto: tira a URL solta do fim.
+  const corpo = texto.replace(/\s*https?:\/\/\S+\s*$/, "");
+  const extra = lerTituloPagina(titulo);
+  abrirColar(false);
+  if (!corpo.trim() || corpo.split("\n").length < 2){
+    mostrarErroColar("Chegou só o link da página, sem a cifra. No navegador, toque e segure na cifra, escolha Selecionar tudo e depois Compartilhar → Cifra no Palco.");
+    return;
+  }
+  $("colar-txt").value = corpo;
+  organizarColado(extra);
+  if (!$("colar").hidden) return;           // não achou cifra: fica na tela de colar com o aviso
+  toast("Cifra recebida. Confira e toque em Salvar.");
+}
 $("colar-txt").addEventListener("paste", () => { $("colar-erro").hidden = true; });
 
 const PROMPT_COLAR = `Você organiza cifras de violão. Abaixo está um texto copiado de um site de cifras: pode ter menus, propagandas, rodapé, e os acordes podem ter perdido o alinhamento.
@@ -1935,7 +1965,7 @@ const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platfo
 let dicaVista = false; try { dicaVista = localStorage.getItem("dica-ios") === "1"; } catch {}
 if (ehIOS && !instalado && !dicaVista && !dentroDeFrame) $("ios-dica").hidden = false;
 $("ios-fechar").onclick = () => { $("ios-dica").hidden = true; try { localStorage.setItem("dica-ios", "1"); } catch {} };
-const VERSAO_APP = "v7 · conta";
+const VERSAO_APP = "v8 · compartilhar";
 if ("serviceWorker" in navigator && location.protocol === "https:" && !dentroDeFrame) {
   const tinhaControle = !!navigator.serviceWorker.controller;
   let recarregou = false;
@@ -1954,9 +1984,12 @@ if ("serviceWorker" in navigator && location.protocol === "https:" && !dentroDeF
 $("versao").textContent = "Cifra no Palco " + VERSAO_APP;
 
 /* ---------- Início ---------- */
+const ehAndroid = /android/i.test(navigator.userAgent);
+$("web-dica").hidden = !(ehAndroid && (matchMedia("(display-mode: standalone)").matches || "serviceWorker" in navigator) && !noClaude);
 renderTudo();
 store.iniciar();
 iniciarSample();
+receberCompartilhado();
 })();
 </script>
 
