@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#12161d">
+<meta name="description" content="Repertório, setlist e cifra rolando no tempo da música, para quem toca em barzinho.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cifra Palco">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -49,6 +57,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .brand h1{margin:0;font-family:var(--font-display);font-weight:800;font-size:30px;letter-spacing:.02em;text-transform:uppercase;line-height:1}
 .brand h1 span{color:var(--accent)}
 .storage{font-size:12px;color:var(--muted)}
+.brand-right{display:flex;align-items:center;gap:10px}
+.btn-instalar{min-height:36px;padding:6px 12px;font-size:14px}
+.install-ios{margin-top:14px;font-size:14px}
 .tabs{display:flex;gap:4px}
 .tab{background:none;border:0;padding:10px 14px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;font-size:15px}
 .tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
@@ -166,6 +177,11 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
   .stage-top{flex-wrap:wrap}
   .stage-tools{width:100%;justify-content:space-between}
   .clock,.speed{min-width:0}
+  .clock{font-size:12px;white-space:nowrap}
+  .stage-bottom{gap:4px}
+  .transport{gap:6px}
+  .round{width:42px;height:42px}
+  .play{width:56px;height:56px}
   .keys{display:none}
 }
 @media (prefers-reduced-motion:reduce){.spinner{animation-duration:3s}}
@@ -175,7 +191,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
   <div class="top-inner">
     <div class="brand">
       <h1>Cifra no <span>Palco</span></h1>
-      <span class="storage" id="storage">Carregando…</span>
+      <span class="brand-right"><span class="storage" id="storage">Carregando…</span><button class="btn primary btn-instalar" id="btn-instalar" hidden>Instalar app</button></span>
     </div>
     <nav class="tabs" role="tablist">
       <button class="tab" role="tab" id="tab-rep" aria-selected="true">Repertório<span class="count" id="count-rep">0</span></button>
@@ -185,6 +201,10 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 </header>
 
 <main class="wrap">
+  <div class="notice install-ios" id="ios-dica" hidden>
+    <strong>Instale no iPhone:</strong> toque em <b>Compartilhar</b> (quadrado com seta, embaixo no Safari) e depois em <b>Adicionar à Tela de Início</b>.
+    <button class="btn ghost" id="ios-fechar" style="min-height:32px;padding:4px 10px;margin-left:6px">Entendi</button>
+  </div>
   <section id="view-rep">
     <div class="actions">
       <button class="btn primary" id="btn-foto">
@@ -257,7 +277,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
     <h2>Foto → Cifra</h2>
   </div></div>
   <div class="wrap">
-    <div class="notice err" id="foto-indisp" hidden>A leitura por foto não está disponível nesta visualização. Abra o app pelo claude.ai com sua conta, ou use “Digitar ou colar”.</div>
+    <div class="notice err" id="foto-indisp" hidden>A leitura por foto ainda não funciona no app instalado: ela usa a IA da conta Claude e só roda na versão do claude.ai. Por enquanto, use “Digitar ou colar”.</div>
     <div class="drop" id="drop">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
       <strong>Fotografe a cifra ou escolha da galeria</strong>
@@ -832,7 +852,7 @@ function renderCifra(){
 function fonteAuto(){
   const maior = Math.max(20, ...(P.m.texto || "").split("\n").map((l) => l.replace(/\s+$/,"").length));
   const larg = corpo.clientWidth - 32;
-  return Math.max(14, Math.min(34, Math.floor(larg / (maior * 0.61))));
+  return Math.max(13, Math.min(34, Math.floor(larg / (maior * 0.64))));
 }
 function aplicarFonte(){ $("p-cifra").style.fontSize = (P.fonte || fonteAuto()) + "px"; }
 function velBase(){
@@ -850,17 +870,20 @@ function atualizarRelogio(){
 function loop(t){
   P.raf = requestAnimationFrame(loop);
   if (!P.tocando){ P.ultimo = t; return; }
-  const dt = Math.min(0.1, (t - (P.ultimo || t)) / 1000); P.ultimo = t;
+  const dt = Math.min(0.5, (t - (P.ultimo || t)) / 1000); P.ultimo = t;
   P.decorrido += dt;
   if (P.intro > 0){
     P.intro -= dt; const c = $("p-contagem");
     if (P.intro > 0){ c.hidden = false; c.textContent = Math.ceil(P.intro); } else c.hidden = true;
   } else {
     if (Math.abs(corpo.scrollTop - P.pos) > 3) P.pos = corpo.scrollTop; // o músico rolou com o dedo
-    P.pos += velBase() * P.vel * dt;
+    const fim = Math.max(0, corpo.scrollHeight - corpo.clientHeight - corpo.clientHeight * 0.55);
+    P.pos = Math.min(fim, P.pos + velBase() * P.vel * dt);
     corpo.scrollTop = P.pos;
-    const max = corpo.scrollHeight - corpo.clientHeight;
-    if (P.pos >= max - corpo.clientHeight * 0.55 - 1 && P.decorrido > 2) terminou();
+    const dur = P.m.duracao || 0;
+    const acabouTempo = dur ? P.decorrido >= dur / P.vel : false;
+    const acabouRolagem = !dur && fim > 0 && P.pos >= fim - 1;
+    if (acabouTempo || acabouRolagem) terminou();
   }
   atualizarRelogio();
 }
@@ -952,6 +975,25 @@ document.addEventListener("keydown", (e) => {
   else if (k === "-"){ ajustarVel(-0.1); }
   else if (k === "Escape"){ sairPalco(); }
 });
+
+/* ---------- App instalável (PWA) ---------- */
+const instalado = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+let pedidoInstalar = null;
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); pedidoInstalar = e; if (!instalado) $("btn-instalar").hidden = false; });
+$("btn-instalar").onclick = async () => {
+  if (!pedidoInstalar) return;
+  pedidoInstalar.prompt();
+  try { await pedidoInstalar.userChoice; } catch {}
+  pedidoInstalar = null; $("btn-instalar").hidden = true;
+};
+window.addEventListener("appinstalled", () => { $("btn-instalar").hidden = true; toast("App instalado na tela inicial"); });
+const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+let dicaVista = false; try { dicaVista = localStorage.getItem("dica-ios") === "1"; } catch {}
+if (ehIOS && !instalado && !dicaVista) $("ios-dica").hidden = false;
+$("ios-fechar").onclick = () => { $("ios-dica").hidden = true; try { localStorage.setItem("dica-ios", "1"); } catch {} };
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
 
 /* ---------- Início ---------- */
 renderTudo();

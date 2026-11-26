@@ -2,7 +2,14 @@
 
 App para quem toca voz e violão em barzinho: repertório, setlist da noite e cifra rolando sozinha no tempo da música.
 
-> Protótipo. Abra o `index.html` no navegador do celular ou do computador.
+**App:** https://szadil763.github.io/cifras-show/
+
+## Como instalar no celular
+
+- **Android (Chrome):** abra o link e toque em **Instalar app** no topo (ou menu ⋮ → *Instalar app* / *Adicionar à tela inicial*).
+- **iPhone (Safari):** abra o link, toque em **Compartilhar** e depois em **Adicionar à Tela de Início**.
+
+Depois de instalado, o app abre em tela cheia e funciona **sem internet** (as músicas ficam salvas no aparelho).
 
 ## O que já funciona
 
@@ -26,7 +33,7 @@ App para quem toca voz e violão em barzinho: repertório, setlist da noite e ci
 
 ## Próximos passos sugeridos
 
-1. Transformar em app instalável (PWA) ou app nativo com Flutter/React Native.
+1. ~~App instalável (PWA)~~ feito. Próximo: publicar nas lojas (Play Store via TWA, ou app nativo com Flutter).
 2. Backend próprio (ex.: Supabase) para login e backup.
 3. Leitura de foto com API própria (Claude com visão) fora do claude.ai.
 4. Rolagem por partes (tempo por estrofe) e, no futuro, rolagem que "escuta" o músico.
