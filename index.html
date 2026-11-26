@@ -177,7 +177,9 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 .chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
 .chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .chip.feito{color:color-mix(in srgb,var(--muted) 60%,transparent)}
-.bloco{padding-top:.15em}
+.bloco{padding-top:.15em;transition:opacity .3s}
+.bloco.agora .s{background:var(--accent)}
+.salto{position:absolute;left:50%;bottom:112px;transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:18px;padding:10px 18px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.45);white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
 .bloco .s small{font-weight:600;opacity:.75;margin-left:.4em;letter-spacing:.04em}
 .bloco.extra .s{background:var(--accent)}
 .sheet-music .rep{font-family:var(--font-body);font-size:.62em;color:var(--accent);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:.3em 0}
@@ -304,7 +306,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
         <p class="notice" id="roteiro-vazio" style="margin:0" hidden>Esta cifra ainda não tem partes marcadas, então o palco rola tudo direto. Marque as partes com uma linha entre colchetes, por exemplo <b>[Primeira Parte]</b> e <b>[Refrão]</b>. Onde o refrão se repete, escreva só <b>[Refrão]</b> ou <b>Refrão 2x</b>.</p>
         <div class="roteiro-chips" id="roteiro-chips"></div>
         <div class="roteiro-add" id="roteiro-add"></div>
-        <p class="hint" style="margin:0">O palco segue esta ordem. Escreva a parte uma vez só e indique a repetição com <b>[Refrão]</b>, <b>Refrão 2x</b> ou <b>(2x)</b> depois da estrofe: o app volta ao trecho certo sozinho.</p>
+        <p class="hint" style="margin:0">O palco segue esta ordem. Escreva cada parte uma vez só e indique a repetição com <b>[Refrão]</b>, <b>Refrão 2x</b> ou <b>(2x)</b> depois da estrofe: no palco, quando chega a hora, a tela salta até o refrão e depois volta para a estrofe seguinte.</p>
       </div>
       <div class="form-actions">
         <div class="grow">
@@ -391,12 +393,14 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
       <div class="pill" title="Mudar o tom"><button id="p-tom-menos" aria-label="Meio tom abaixo">−</button><span class="k" id="p-tom">G</span><button id="p-tom-mais" aria-label="Meio tom acima">+</button></div>
       <div class="pill" title="Tamanho da letra"><button id="p-fonte-menos" aria-label="Diminuir letra">A−</button><button id="p-fonte-mais" aria-label="Aumentar letra">A+</button></div>
       <button class="btn-rep" id="p-repetir" title="Toca a parte atual mais uma vez (tecla R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></svg><span id="p-repetir-txt">Repetir parte</span></button>
+      <button class="btn-rep" id="p-modo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 20V4M3 8l4-4 4 4M17 4v16M13 16l4 4 4-4"/></svg><span id="p-modo-txt">Saltar</span></button>
     </div>
   </div>
   <nav class="mapa" id="p-mapa" aria-label="Partes da música"></nav>
   <div class="progress"><i id="p-prog"></i></div>
   <div class="stage-body" id="p-corpo"><div class="sheet-music" id="p-cifra"></div></div>
   <div class="countdown" id="p-contagem" hidden></div>
+  <div class="salto" id="p-salto" hidden role="status"></div>
   <div class="next-card" id="p-proxima" hidden>
     <div><small>Próxima do setlist</small><b id="p-proxima-nome"></b></div>
     <button class="btn primary" id="p-proxima-ir">Tocar</button>
@@ -412,7 +416,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
     </div>
     <div class="speed">velocidade<b id="p-vel">100%</b></div>
   </div>
-  <div class="keys">Teclado ou pedal: <kbd>Espaço</kbd> tocar/pausar · <kbd>↓</kbd><kbd>PgDn</kbd> avançar · <kbd>↑</kbd><kbd>PgUp</kbd> voltar · <kbd>→</kbd> próxima · <kbd>←</kbd> anterior · <kbd>R</kbd> repetir parte</div>
+  <div class="keys">Teclado ou pedal: <kbd>Espaço</kbd> tocar/pausar · <kbd>↓</kbd><kbd>PgDn</kbd> avançar · <kbd>↑</kbd><kbd>PgUp</kbd> voltar · <kbd>→</kbd> próxima · <kbd>←</kbd> anterior · <kbd>R</kbd> repetir parte · no modo Saltar, <kbd>↓</kbd><kbd>↑</kbd> vão para a próxima/anterior parte</div>
 </div>
 
 <div class="toast" id="toast" hidden></div>
@@ -1214,8 +1218,15 @@ $("foto-ler").onclick = async () => {
 $("foto-parar").onclick = () => ctlFoto?.abort();
 
 /* ---------- Modo palco ---------- */
-const P = { fila: [], i: 0, m: null, tocando: false, pos: 0, ultimo: 0, decorrido: 0, intro: 0, vel: 1, transp: 0, fonte: 0, alterado: false, voltarEditor: false, wake: null, raf: 0, est: null, seq: [], atual: -1, durExtra: 0 };
+// Dois modos de rolagem:
+//  "salto"   cada parte aparece uma vez (como na folha) e a tela SALTA até a parte certa
+//            quando o roteiro manda voltar (ex.: fim da estrofe -> volta ao refrão).
+//  "corrido" as repetições aparecem escritas em sequência e a tela rola direto.
+const P = { fila: [], i: 0, m: null, tocando: false, pos: 0, ultimo: 0, decorrido: 0, intro: 0, vel: 1, transp: 0, fonte: 0, alterado: false, voltarEditor: false, wake: null, raf: 0,
+  est: null, seq: [], atual: -1, durExtra: 0, modo: "salto", passos: [], passo: 0, tPasso: 0, anim: null, setY: 0, acabou: false };
 const corpo = $("p-corpo");
+let modoPreferido = "salto";
+try { modoPreferido = localStorage.getItem("modo-rolagem") || "salto"; } catch {}
 
 function linhaPalco(raw, bemol){
   const d = document.createElement("div"); d.className = "l";
@@ -1227,35 +1238,53 @@ function linhaPalco(raw, bemol){
   else d.textContent = raw;
   return d;
 }
+function temPartes(){ return P.seq.length > 1 && !!P.seq[0].key; }
+function cabecalhoParte(nome, extra){
+  const cab = document.createElement("div"); cab.className = "l";
+  const s = document.createElement("span"); s.className = "s"; s.textContent = nome;
+  if (extra){ const sm = document.createElement("small"); sm.textContent = extra; s.append(sm); }
+  cab.append(s); return cab;
+}
 function renderCifra(){
   const m = P.m, el = $("p-cifra"); el.textContent = "";
   const bemol = usarBemol(m.tom, P.transp, m.texto || "");
   for (const l of P.est.preambulo) el.append(linhaPalco(l, bemol));
-  const vezes = {};
-  P.seq.forEach((item, i) => {
-    const bloco = document.createElement("section"); bloco.className = "bloco" + (item.extra ? " extra" : ""); bloco.dataset.i = i;
-    const def = item.key ? P.est.defs.get(item.key) : { nome: "", linhas: (m.texto || "").split("\n") };
-    if (item.key){
-      vezes[item.key] = (vezes[item.key] || 0) + 1;
-      const cab = document.createElement("div"); cab.className = "l";
-      const s = document.createElement("span"); s.className = "s"; s.textContent = def.nome;
-      if (vezes[item.key] > 1){ const sm = document.createElement("small"); sm.textContent = vezes[item.key] + "ª vez"; s.append(sm); }
-      cab.append(s); bloco.append(cab);
-    }
-    for (const l of expandirEstrofes(def.linhas)) bloco.append(linhaPalco(l, bemol));
-    if (i < P.seq.length - 1) bloco.append(Object.assign(document.createElement("div"), { className: "l" }));
-    el.append(bloco);
-  });
-  const fim = document.createElement("div"); fim.className = "end"; fim.textContent = "fim"; el.append(fim);
+  if (P.modo === "salto"){
+    // Cada parte uma vez, na ordem em que está escrita.
+    const usos = {}; for (const it of P.seq) usos[it.key] = (usos[it.key] || 0) + 1;
+    const chaves = [...P.est.defs.keys()];
+    chaves.forEach((key, n) => {
+      const def = P.est.defs.get(key);
+      const bloco = document.createElement("section"); bloco.className = "bloco"; bloco.dataset.key = key;
+      bloco.append(cabecalhoParte(def.nome, usos[key] > 1 ? "toca " + usos[key] + "×" : (usos[key] ? "" : "fora do roteiro")));
+      for (const l of expandirEstrofes(def.linhas)) bloco.append(linhaPalco(l, bemol));
+      if (n < chaves.length - 1) bloco.append(Object.assign(document.createElement("div"), { className: "l" }));
+      el.append(bloco);
+    });
+  } else {
+    const vezes = {};
+    P.seq.forEach((item, i) => {
+      const bloco = document.createElement("section"); bloco.className = "bloco" + (item.extra ? " extra" : ""); bloco.dataset.i = i;
+      const def = item.key ? P.est.defs.get(item.key) : { nome: "", linhas: (m.texto || "").split("\n") };
+      if (item.key){ vezes[item.key] = (vezes[item.key] || 0) + 1; bloco.append(cabecalhoParte(def.nome, vezes[item.key] > 1 ? vezes[item.key] + "ª vez" : "")); }
+      for (const l of expandirEstrofes(def.linhas)) bloco.append(linhaPalco(l, bemol));
+      if (i < P.seq.length - 1) bloco.append(Object.assign(document.createElement("div"), { className: "l" }));
+      el.append(bloco);
+    });
+  }
+  // No modo Saltar o fim da folha não é o fim da música (o roteiro pode voltar ao refrão).
+  if (P.modo !== "salto" || !temPartes()){ const fim = document.createElement("div"); fim.className = "end"; fim.textContent = "fim"; el.append(fim); }
   $("p-tom").textContent = transporTom(m.tom, P.transp) || (P.transp ? (P.transp > 0 ? "+" : "") + P.transp : "tom");
   renderMapa();
   aplicarFonte();
 }
 function renderMapa(){
   const mapa = $("p-mapa"); mapa.textContent = "";
-  const comPartes = P.seq.length > 1 && P.seq[0].key;
-  mapa.hidden = !comPartes; $("p-repetir").hidden = !comPartes;
-  if (!comPartes) return;
+  const com = temPartes();
+  mapa.hidden = !com; $("p-repetir").hidden = !com; $("p-modo").hidden = !com;
+  $("p-modo-txt").textContent = P.modo === "salto" ? "Saltar" : "Corrido";
+  $("p-modo").title = P.modo === "salto" ? "Cada parte aparece uma vez e a tela salta até ela. Toque para ver as repetições escritas." : "As repetições aparecem escritas em sequência. Toque para saltar entre as partes.";
+  if (!com) return;
   P.seq.forEach((item, i) => {
     const c = document.createElement("button"); c.className = "chip"; c.dataset.i = i;
     c.textContent = P.est.defs.get(item.key)?.nome || "Parte";
@@ -1264,11 +1293,37 @@ function renderMapa(){
   });
   P.atual = -1; marcarParteAtual();
 }
-function blocoTopo(i){ const b = $("p-cifra").querySelector(`.bloco[data-i="${i}"]`); return b ? b.offsetTop - $("p-cifra").offsetTop : 0; }
+// Posição de um elemento dentro da área que rola.
+function yDe(el){ return el.getBoundingClientRect().top - corpo.getBoundingClientRect().top + corpo.scrollTop; }
+function blocoDaChave(key){ return $("p-cifra").querySelector(`.bloco[data-key="${CSS.escape(key)}"]`); }
+function linhasDaParte(key){ return expandirEstrofes(P.est.defs.get(key)?.linhas || []).length + 2; }
+
+// Monta a linha do tempo do modo salto: quanto tempo cada passo do roteiro dura e de onde até onde a tela rola.
+function calcularPassos(){
+  if (P.modo !== "salto" || !temPartes()) { P.passos = []; return; }
+  const H = corpo.clientHeight;
+  const pesos = P.seq.map((it) => linhasDaParte(it.key));
+  const soma = pesos.reduce((a, b) => a + b, 0) || 1;
+  const tempo = Math.max(10, durTotal() - (P.m.intro || 0));
+  P.passos = P.seq.map((it, i) => {
+    const b = blocoDaChave(it.key);
+    const topo = b ? yDe(b) : 0, alt = b ? b.offsetHeight : 0;
+    const start = Math.max(0, topo - H * 0.06);
+    return { key: it.key, dur: tempo * pesos[i] / soma, start, fimBloco: Math.max(start, topo + alt - H * 0.7), proximoColado: false, end: 0 };
+  });
+  P.passos.forEach((p, i) => {
+    const nx = P.passos[i + 1];
+    const b = blocoDaChave(p.key);
+    // Se a próxima parte vem logo abaixo na folha, rola direto até ela; senão, salta.
+    p.proximoColado = !!(nx && b && b.nextElementSibling && b.nextElementSibling.dataset && b.nextElementSibling.dataset.key === nx.key);
+    p.end = p.proximoColado ? nx.start : p.fimBloco;
+  });
+}
 function parteAtual(){
+  if (P.modo === "salto") return Math.min(P.passo, P.seq.length - 1);
   const linha = corpo.scrollTop + corpo.clientHeight * 0.25;
   let atual = 0;
-  for (const b of $("p-cifra").querySelectorAll(".bloco")){ if (b.offsetTop - $("p-cifra").offsetTop <= linha) atual = +b.dataset.i; else break; }
+  for (const b of $("p-cifra").querySelectorAll(".bloco")){ if (yDe(b) <= linha) atual = +b.dataset.i; else break; }
   return atual;
 }
 function marcarParteAtual(){
@@ -1279,33 +1334,59 @@ function marcarParteAtual(){
   mapa.querySelectorAll(".chip").forEach((c) => { const n = +c.dataset.i; c.classList.toggle("on", n === i); c.classList.toggle("feito", n < i); });
   const c = mapa.querySelector(`.chip[data-i="${i}"]`);
   if (c) mapa.scrollTo({ left: c.offsetLeft - mapa.clientWidth / 2 + c.offsetWidth / 2, behavior: "smooth" });
-  const nome = P.est.defs.get(P.seq[i]?.key)?.nome;
+  const key = P.seq[i]?.key, nome = P.est.defs.get(key)?.nome;
   $("p-repetir-txt").textContent = nome ? "Repetir " + nome.toLowerCase() : "Repetir parte";
+  if (P.modo === "salto") $("p-cifra").querySelectorAll(".bloco").forEach((b) => b.classList.toggle("agora", b.dataset.key === key));
 }
 function irParaParte(i){
-  P.intro = 0; $("p-contagem").hidden = true;
-  P.pos = Math.max(0, blocoTopo(i) - 6);
-  rolarPara(P.pos);
-  $("p-proxima").hidden = true;
+  P.intro = 0; $("p-contagem").hidden = true; $("p-proxima").hidden = true; P.acabou = false;
+  if (P.modo === "salto"){
+    P.passo = i; P.tPasso = 0;
+    const alvo = P.passos[i]?.start ?? 0;
+    if (P.tocando) P.anim = { from: corpo.scrollTop, t: 0 };
+    else { corpo.scrollTo({ top: alvo, behavior: "smooth" }); P.setY = alvo; }
+    marcarParteAtual();
+  } else {
+    const b = $("p-cifra").querySelector(`.bloco[data-i="${i}"]`);
+    P.pos = b ? Math.max(0, yDe(b) - 6) : 0;
+    rolarPara(P.pos);
+  }
 }
-function linhasDaParte(key){ return expandirEstrofes(P.est.defs.get(key)?.linhas || []).length + 2; }
 function repetirParte(){
-  if ($("p-mapa").hidden) return;
+  if (!temPartes()) return;
   const i = parteAtual(), item = P.seq[i]; if (!item?.key) return;
   // Tempo extra proporcional ao tamanho da parte, para a velocidade não mudar.
   const total = P.seq.reduce((n, it) => n + linhasDaParte(it.key), 0);
   P.durExtra += ((P.m.duracao || 180) + P.durExtra) * linhasDaParte(item.key) / total;
   P.seq.splice(i + 1, 0, { key: item.key, extra: true });
-  const top = corpo.scrollTop; renderCifra(); corpo.scrollTop = top; P.pos = top;
-  $("p-proxima").hidden = true;
+  if (P.modo === "salto"){ renderMapa(); calcularPassos(); }
+  else { const top = corpo.scrollTop; renderCifra(); corpo.scrollTop = top; P.pos = top; }
+  $("p-proxima").hidden = true; P.acabou = false;
   toast(P.est.defs.get(item.key).nome + " vai tocar mais uma vez");
+}
+// O músico rolou com o dedo: descobre em que parte do roteiro ele está.
+function ressincronizar(){
+  const y = corpo.scrollTop, linha = y + corpo.clientHeight * 0.25;
+  let key = null;
+  for (const b of $("p-cifra").querySelectorAll(".bloco")){ if (yDe(b) <= linha) key = b.dataset.key; else break; }
+  if (!key) key = P.seq[0]?.key;
+  let melhor = -1, dist = 1e9;
+  P.passos.forEach((p, i) => { if (p.key !== key) return; const d = i >= P.passo ? i - P.passo : (P.passo - i) + 0.5; if (d < dist){ dist = d; melhor = i; } });
+  if (melhor < 0) return;
+  const p = P.passos[melhor];
+  P.passo = melhor;
+  P.tPasso = p.end > p.start ? Math.max(0, Math.min(1, (y - p.start) / (p.end - p.start))) * p.dur : 0;
+  P.setY = y; P.anim = null;
 }
 function fonteAuto(){
   const maior = Math.max(20, ...(P.m.texto || "").split("\n").map((l) => l.replace(/\s+$/,"").length));
   const larg = corpo.clientWidth - 32;
   return Math.max(13, Math.min(34, Math.floor(larg / (maior * 0.64))));
 }
-function aplicarFonte(){ $("p-cifra").style.fontSize = (P.fonte || fonteAuto()) + "px"; }
+function aplicarFonte(){
+  $("p-cifra").style.fontSize = (P.fonte || fonteAuto()) + "px";
+  if (P.modo === "salto"){ const k = P.passos[P.passo]; calcularPassos(); if (k && P.passos[P.passo]) { /* mantém o passo atual */ } }
+}
 function durTotal(){ return (P.m.duracao || 180) + P.durExtra; }
 function velBase(){
   const max = corpo.scrollHeight - corpo.clientHeight;
@@ -1314,33 +1395,77 @@ function velBase(){
 }
 function atualizarRelogio(){
   const dur = P.m.duracao ? durTotal() : 0;
-  const fim = corpo.scrollHeight - corpo.clientHeight * 1.55;
+  let prog = 0;
+  if (P.modo === "salto" && P.passos.length){
+    const total = P.passos.reduce((a, p) => a + p.dur, 0) || 1;
+    const feito = P.passos.slice(0, P.passo).reduce((a, p) => a + p.dur, 0) + Math.min(P.tPasso, P.passos[P.passo]?.dur || 0);
+    prog = feito / total * 100;
+  } else {
+    const fim = corpo.scrollHeight - corpo.clientHeight * 1.55;
+    prog = fim > 0 ? corpo.scrollTop / fim * 100 : (dur ? P.decorrido / dur * 100 : 0);
+  }
   $("p-tempo").textContent = fmtTempo(P.decorrido);
   $("p-total").textContent = dur ? fmtTempo(dur) : "—";
-  $("p-prog").style.width = (fim > 0 ? Math.min(100, corpo.scrollTop / fim * 100) : (dur ? Math.min(100, P.decorrido / dur * 100) : 0)) + "%";
+  $("p-prog").style.width = Math.min(100, Math.max(0, prog)) + "%";
   $("p-vel").textContent = Math.round(P.vel * 100) + "%";
+}
+function avisoSalto(){
+  const aviso = $("p-salto");
+  const p = P.passos[P.passo], nx = P.passos[P.passo + 1];
+  if (!P.tocando || P.intro > 0 || !p || !nx || p.proximoColado){ aviso.hidden = true; return; }
+  const falta = (p.dur - P.tPasso) / P.vel;
+  if (falta <= 4){
+    const nome = P.est.defs.get(nx.key)?.nome || "próxima parte";
+    if (nx.key === p.key) aviso.textContent = "↻ Mais uma vez: " + nome;
+    else aviso.textContent = (nx.start < corpo.scrollTop ? "↑ " : "↓ ") + "Em seguida: " + nome;
+    aviso.hidden = false;
+  } else aviso.hidden = true;
+}
+function passoSalto(dt){
+  if (!P.passos.length) calcularPassos();
+  if (!P.anim && Math.abs(corpo.scrollTop - P.setY) > 4) ressincronizar();   // o músico mexeu na tela
+  let p = P.passos[P.passo]; if (!p) return;
+  P.tPasso += dt * P.vel;
+  while (P.tPasso >= p.dur){
+    if (P.passo >= P.passos.length - 1){ P.tPasso = p.dur; terminou(); break; }
+    P.tPasso -= p.dur;
+    const anterior = p; P.passo++; p = P.passos[P.passo];
+    if (!anterior.proximoColado) P.anim = { from: corpo.scrollTop, t: 0 };   // salto até a parte certa
+  }
+  let y = p.start + (p.end - p.start) * Math.min(1, P.tPasso / p.dur);
+  if (P.anim){
+    P.anim.t += dt;
+    const k = Math.min(1, P.anim.t / 0.7), e = 1 - Math.pow(1 - k, 3);
+    y = P.anim.from + (y - P.anim.from) * e;
+    if (k >= 1) P.anim = null;
+  }
+  corpo.scrollTop = y; P.setY = corpo.scrollTop; P.pos = P.setY;
+}
+function passoCorrido(dt){
+  if (Math.abs(corpo.scrollTop - P.pos) > 3) P.pos = corpo.scrollTop; // o músico rolou com o dedo
+  const fim = Math.max(0, corpo.scrollHeight - corpo.clientHeight - corpo.clientHeight * 0.55);
+  P.pos = Math.min(fim, P.pos + velBase() * P.vel * dt);
+  corpo.scrollTop = P.pos;
+  // Com rolagem, termina ao chegar no fim; sem rolagem (música curta), pelo tempo.
+  const acabou = fim > 0 ? (P.pos >= fim - 1 && P.decorrido > 2) : P.decorrido >= durTotal() / P.vel;
+  if (acabou) terminou();
 }
 function loop(t){
   P.raf = requestAnimationFrame(loop);
-  if (!P.tocando){ P.ultimo = t; return; }
+  if (!P.tocando){ P.ultimo = t; $("p-salto").hidden = true; return; }
   const dt = Math.min(0.5, (t - (P.ultimo || t)) / 1000); P.ultimo = t;
   P.decorrido += dt;
   if (P.intro > 0){
     P.intro -= dt; const c = $("p-contagem");
     if (P.intro > 0){ c.hidden = false; c.textContent = Math.ceil(P.intro); } else c.hidden = true;
-  } else {
-    if (Math.abs(corpo.scrollTop - P.pos) > 3) P.pos = corpo.scrollTop; // o músico rolou com o dedo
-    const fim = Math.max(0, corpo.scrollHeight - corpo.clientHeight - corpo.clientHeight * 0.55);
-    P.pos = Math.min(fim, P.pos + velBase() * P.vel * dt);
-    corpo.scrollTop = P.pos;
-    // Com rolagem, termina ao chegar no fim (mesmo se o músico voltou ao refrão); sem rolagem, pelo tempo.
-    const acabou = fim > 0 ? (P.pos >= fim - 1 && P.decorrido > 2) : P.decorrido >= durTotal() / P.vel;
-    if (acabou) terminou();
-  }
+  } else if (P.modo === "salto" && temPartes()) passoSalto(dt);
+  else passoCorrido(dt);
+  avisoSalto();
   marcarParteAtual();
   atualizarRelogio();
 }
 function terminou(){
+  P.acabou = true;
   setTocando(false);
   const prox = P.fila[P.i + 1] && estado.musicas.get(P.fila[P.i + 1]);
   if (prox){ $("p-proxima-nome").textContent = prox.titulo; $("p-proxima").hidden = false; }
@@ -1349,28 +1474,34 @@ function setTocando(v){
   P.tocando = v;
   $("p-play").innerHTML = v ? ICON_PAUSE : ICON_PLAY;
   $("p-play").setAttribute("aria-label", v ? "Pausar" : "Tocar");
-  if (v){ $("p-proxima").hidden = true; pedirTelaLigada(); }
-  else $("p-contagem").hidden = true;
+  if (v){ $("p-proxima").hidden = true; pedirTelaLigada(); P.setY = corpo.scrollTop; if (P.modo === "salto" && temPartes() && !P.passos.length) calcularPassos(); }
+  else { $("p-contagem").hidden = true; $("p-salto").hidden = true; }
 }
 async function pedirTelaLigada(){
   try { if ("wakeLock" in navigator && !P.wake) { P.wake = await navigator.wakeLock.request("screen"); P.wake.addEventListener?.("release", () => { P.wake = null; }); } } catch {}
 }
 document.addEventListener("visibilitychange", () => { if (!$("palco").hidden && document.visibilityState === "visible") pedirTelaLigada(); });
 
+function reiniciarMusica(){
+  P.pos = 0; P.decorrido = 0; P.intro = P.m.intro || 0; P.durExtra = 0;
+  P.passo = 0; P.tPasso = 0; P.anim = null; P.setY = 0; P.acabou = false;
+  ({ est: P.est, seq: P.seq } = montarSequencia(P.m));
+  P.modo = modoPreferido;
+  renderCifra();
+  corpo.scrollTop = 0;
+  calcularPassos();
+}
 function carregarNoPalco(i){
   salvarAjustesPalco();
   P.i = i; P.m = estado.musicas.get(P.fila[i]);
   if (!P.m) return;
   P.vel = P.m.velocidade || 1; P.transp = P.m.transp || 0; P.fonte = P.m.fonte || 0; P.alterado = false;
-  P.pos = 0; P.decorrido = 0; P.intro = P.m.intro || 0; P.durExtra = 0;
-  ({ est: P.est, seq: P.seq } = montarSequencia(P.m));
   $("p-titulo").textContent = P.m.titulo;
   const pos = P.fila.length > 1 ? `${i+1} de ${P.fila.length} · ` : "";
   $("p-sub").textContent = pos + (P.m.artista || "") + (P.m.duracao ? "" : " · sem duração: usando 3:00");
   $("p-proxima").hidden = true;
   setTocando(false);
-  renderCifra();
-  corpo.scrollTop = 0;
+  reiniciarMusica();
   $("p-ant").disabled = i === 0; $("p-prox").disabled = i >= P.fila.length - 1;
   atualizarRelogio();
 }
@@ -1395,21 +1526,40 @@ function sairPalco(){
   $("palco").hidden = true;
   if (P.voltarEditor && editando) abrirEditor(editando);
 }
+function trocarModo(){
+  modoPreferido = P.modo === "salto" ? "corrido" : "salto";
+  try { localStorage.setItem("modo-rolagem", modoPreferido); } catch {}
+  const parte = parteAtual();
+  P.modo = modoPreferido; P.anim = null;
+  renderCifra(); calcularPassos();
+  irParaParte(Math.max(0, parte));
+  toast(P.modo === "salto" ? "Saltar: cada parte uma vez, a tela vai até ela" : "Corrido: repetições escritas em sequência");
+}
 function ajustarVel(d){ P.vel = Math.max(0.3, Math.min(3, Math.round((P.vel + d)*100)/100)); P.alterado = true; atualizarRelogio(); }
 // Tocando: pulo imediato (a rolagem automática continua dali). Parado: pulo suave.
 function rolarPara(y){ if (P.tocando) corpo.scrollTop = y; else corpo.scrollTo({ top: y, behavior: "smooth" }); }
-function rolarTela(dir){ P.pos = Math.max(0, corpo.scrollTop + dir * corpo.clientHeight * 0.5); rolarPara(P.pos); }
-function alternar(){
-  if (!P.tocando && P.pos >= corpo.scrollHeight - corpo.clientHeight * 1.55 - 1){
-    P.pos = 0; corpo.scrollTop = 0; P.decorrido = 0; P.intro = P.m.intro || 0; P.durExtra = 0;
-    ({ est: P.est, seq: P.seq } = montarSequencia(P.m)); renderCifra();
+function rolarTela(dir){
+  if (P.modo === "salto" && temPartes()){
+    // Pedal: avança ou volta uma parte do roteiro.
+    irParaParte(Math.max(0, Math.min(P.seq.length - 1, P.passo + dir)));
+    return;
   }
+  P.pos = Math.max(0, corpo.scrollTop + dir * corpo.clientHeight * 0.5); rolarPara(P.pos);
+}
+function alternar(){
+  const noFim = P.modo === "salto" && temPartes() ? P.acabou : P.pos >= corpo.scrollHeight - corpo.clientHeight * 1.55 - 1;
+  if (!P.tocando && noFim) reiniciarMusica();
   setTocando(!P.tocando);
 }
 
 $("p-play").onclick = alternar;
 $("p-repetir").onclick = repetirParte;
-corpo.addEventListener("scroll", () => { if (!P.tocando) marcarParteAtual(); }, { passive: true });
+$("p-modo").onclick = trocarModo;
+corpo.addEventListener("scroll", () => {
+  if (P.tocando) return;
+  if (P.modo === "salto" && temPartes() && P.passos.length && Math.abs(corpo.scrollTop - P.setY) > 4) ressincronizar();
+  marcarParteAtual();
+}, { passive: true });
 $("p-sair").onclick = sairPalco;
 $("p-lento").onclick = () => ajustarVel(-0.1);
 $("p-rapido").onclick = () => ajustarVel(0.1);
@@ -1420,7 +1570,7 @@ $("p-tom-menos").onclick = () => { P.transp = (P.transp - 1) % 12; P.alterado = 
 $("p-tom-mais").onclick = () => { P.transp = (P.transp + 1) % 12; P.alterado = true; renderCifra(); };
 $("p-fonte-menos").onclick = () => { P.fonte = Math.max(12, (P.fonte || fonteAuto()) - 2); P.alterado = true; aplicarFonte(); };
 $("p-fonte-mais").onclick = () => { P.fonte = Math.min(60, (P.fonte || fonteAuto()) + 2); P.alterado = true; aplicarFonte(); };
-window.addEventListener("resize", () => { if (!$("palco").hidden && !P.fonte) aplicarFonte(); });
+window.addEventListener("resize", () => { if ($("palco").hidden) return; if (!P.fonte) aplicarFonte(); else calcularPassos(); });
 
 // Pedal Bluetooth de virar página funciona como teclado
 document.addEventListener("keydown", (e) => {
@@ -1454,7 +1604,7 @@ const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platfo
 let dicaVista = false; try { dicaVista = localStorage.getItem("dica-ios") === "1"; } catch {}
 if (ehIOS && !instalado && !dicaVista && !dentroDeFrame) $("ios-dica").hidden = false;
 $("ios-fechar").onclick = () => { $("ios-dica").hidden = true; try { localStorage.setItem("dica-ios", "1"); } catch {} };
-const VERSAO_APP = "v5 · roteiro";
+const VERSAO_APP = "v6 · saltos";
 if ("serviceWorker" in navigator && location.protocol === "https:" && !dentroDeFrame) {
   const tinhaControle = !!navigator.serviceWorker.controller;
   let recarregou = false;

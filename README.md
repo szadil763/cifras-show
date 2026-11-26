@@ -24,6 +24,7 @@ Depois de instalado, o app abre em tela cheia e funciona **sem internet** (as m�
   - velocidade + e − (fica salva por música);
   - mudar o tom (transposição de meio em meio tom, escolhendo sustenido ou bemol pelo tom);
   - tamanho da letra automático ou manual;
+  - **modo Saltar** (padrão): cada parte aparece uma vez, como na folha, e a rolagem segue o roteiro — ao terminar a estrofe, a tela vai direto até o refrão e depois volta para a estrofe seguinte. Alguns segundos antes, aparece o aviso "↑ Em seguida: Refrão". No pedal, `↓`/`↑` vão para a próxima/anterior parte. O botão **Corrido** mostra as repetições escritas em sequência, se preferir;
   - mapa de partes no topo: mostra onde você está e pula para qualquer parte com um toque;
   - botão **Repetir parte** (ou tecla `R`) para tocar o refrão mais uma vez quando o público pede — a velocidade não muda;
   - tela sempre ligada (Wake Lock) enquanto o palco está aberto;
