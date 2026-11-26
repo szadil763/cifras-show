@@ -32,10 +32,17 @@ Depois de instalado, o app abre em tela cheia e funciona **sem internet** (as m�
 - **Setlist**: ordem do show, tempo total e passagem automática para a próxima música.
 - **Cronômetro**: mede a duração ouvindo a música (toca no relógio no começo e no fim).
 
+## Conta e preferências
+
+- **Login com email e senha** (botão de pessoa no topo): guarda músicas, setlist e preferências na nuvem (Supabase, projeto `cifras-show`) para usar em vários aparelhos. O app continua salvando primeiro no aparelho e funciona offline; sincroniza ao entrar, ao salvar, ao voltar para o app e quando a internet volta. Se a mesma música mudou em dois aparelhos, vale a versão mais recente.
+- **Preferências**: nome artístico (aparece no topo), cor de destaque, modo de rolagem (Saltar/Corrido), tamanho da letra no palco e espera padrão antes de rolar.
+- Segurança: cada usuário só lê e altera as próprias linhas (RLS nas tabelas `musicas` e `perfis`). A chave do Supabase no app é a pública (anon).
+- Configuração necessária no Supabase: *Authentication → URL Configuration* com Site URL `https://szadil763.github.io/cifras-show/` (para os links de confirmação e de nova senha abrirem o app).
+
 ## Onde os dados ficam
 
 - No claude.ai: no banco do próprio artefato, privado para cada pessoa.
-- Abrindo o arquivo direto: no navegador (`localStorage`) do aparelho.
+- No app instalado: no aparelho (`localStorage`) e, com login, também na sua conta.
 
 ## Próximos passos sugeridos
 

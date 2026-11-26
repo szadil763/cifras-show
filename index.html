@@ -58,6 +58,21 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .brand h1 span{color:var(--accent)}
 .storage{font-size:12px;color:var(--muted)}
 .brand-right{display:flex;align-items:center;gap:10px}
+.brand-left{display:flex;flex-direction:column;gap:2px;min-width:0}
+.saudacao{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn-conta{width:40px;height:40px;min-height:40px;border-radius:50%;padding:0;position:relative}
+.btn-conta.logado::after{content:"";position:absolute;right:2px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--ok);border:2px solid var(--bg)}
+.painel{display:grid;gap:14px;border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:16px;background:color-mix(in srgb,var(--surface) 45%,transparent)}
+.painel h3{margin:0;font-family:var(--font-display);text-transform:uppercase;letter-spacing:.04em;font-size:20px;font-weight:800}
+.campo{display:grid;gap:8px}
+.campo>span{font-size:13px;color:var(--muted);font-weight:600}
+.cores{display:flex;gap:10px;flex-wrap:wrap}
+.cor{width:40px;height:40px;border-radius:50%;background:var(--c);border:3px solid transparent;box-shadow:0 0 0 1px var(--line)}
+.cor[aria-pressed="true"]{border-color:var(--fg)}
+.opcoes{display:flex;flex-wrap:wrap;gap:6px}
+.opcao{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:600;font-size:14px}
+.opcao[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+input[type=email],input[type=password]{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:11px 12px;color:var(--fg);width:100%;min-width:0}
 .btn-instalar{min-height:36px;padding:6px 12px;font-size:14px}
 .install-ios{margin-top:14px;font-size:14px}
 .tabs{display:flex;gap:4px}
@@ -220,8 +235,9 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 <header class="top">
   <div class="top-inner">
     <div class="brand">
-      <h1>Cifra no <span>Palco</span></h1>
-      <span class="brand-right"><span class="storage" id="storage">Carregando…</span><button class="btn primary btn-instalar" id="btn-instalar" hidden>Instalar app</button></span>
+      <div class="brand-left"><h1>Cifra no <span>Palco</span></h1><span class="saudacao" id="saudacao" hidden></span></div>
+      <span class="brand-right"><span class="storage" id="storage">Carregando…</span><button class="btn primary btn-instalar" id="btn-instalar" hidden>Instalar app</button>
+        <button class="btn icon-btn btn-conta" id="btn-conta" aria-label="Conta e preferências" title="Conta e preferências"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button></span>
     </div>
     <nav class="tabs" role="tablist">
       <button class="tab" role="tab" id="tab-rep" aria-selected="true">Repertório<span class="count" id="count-rep">0</span></button>
@@ -381,6 +397,53 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
       <li><b>2</b><span>A leitura usa a IA da sua conta Claude. Na primeira vez o app pede sua permissão.</span></li>
       <li><b>3</b><span>Você confere a cifra no editor antes de salvar. Nada vai para o repertório sem a sua revisão.</span></li>
     </ol>
+  </div>
+</div>
+
+<!-- Conta e preferências -->
+<div class="sheet" id="conta" hidden>
+  <div class="sheet-head"><div class="sheet-head-inner">
+    <button class="btn ghost icon-btn" id="conta-fechar" aria-label="Voltar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <h2>Conta e preferências</h2>
+  </div></div>
+  <div class="wrap">
+    <section class="painel">
+      <h3>Sua conta</h3>
+      <div class="notice" id="conta-indisp" hidden>Aqui no claude.ai suas músicas já ficam salvas na sua conta Claude. O login com email é do app instalado: abra <b>szadil763.github.io/cifras-show</b> no celular.</div>
+      <form class="form" id="conta-fora" style="margin:0" onsubmit="return false">
+        <p class="hint" style="margin:0">Entre com seu email para guardar músicas, setlist e preferências na nuvem e usar no celular, no tablet ou num aparelho novo. Sem login, tudo fica só neste aparelho.</p>
+        <label>Email<input type="email" id="c-email" autocomplete="email" inputmode="email" placeholder="voce@email.com"></label>
+        <label>Senha<input type="password" id="c-senha" autocomplete="current-password" placeholder="Mínimo de 6 caracteres"></label>
+        <div class="form-actions" style="justify-content:flex-start">
+          <button class="btn primary" id="c-entrar" type="submit">Entrar</button>
+          <button class="btn" id="c-criar" type="button">Criar conta</button>
+        </div>
+        <button class="linkbtn" id="c-esqueci" type="button" style="justify-self:start">Esqueci minha senha</button>
+      </form>
+      <div class="form" id="conta-dentro" style="margin:0" hidden>
+        <p style="margin:0">Conectado como <b id="c-quem"></b></p>
+        <p class="hint" id="c-sync" style="margin:0"></p>
+        <div class="form-actions" style="justify-content:flex-start">
+          <button class="btn" id="c-sinc" type="button">Sincronizar agora</button>
+          <button class="btn danger" id="c-sair" type="button">Sair da conta</button>
+        </div>
+      </div>
+      <form class="form" id="conta-nova" style="margin:0" hidden onsubmit="return false">
+        <p style="margin:0"><b>Crie uma nova senha</b></p>
+        <label>Nova senha<input type="password" id="c-nova" autocomplete="new-password" placeholder="Mínimo de 6 caracteres"></label>
+        <button class="btn primary" id="c-salvar-senha" type="submit" style="justify-self:start">Salvar nova senha</button>
+      </form>
+      <div class="notice" id="c-msg" hidden role="status"></div>
+    </section>
+    <section class="painel">
+      <h3>Preferências</h3>
+      <label>Seu nome ou nome artístico<input type="text" id="pref-nome" maxlength="60" placeholder="Aparece no topo do repertório"></label>
+      <div class="campo"><span>Cor de destaque</span><div class="cores" id="pref-cores"></div></div>
+      <div class="campo"><span>Rolagem no palco</span><div class="opcoes" id="pref-modo"></div>
+        <p class="hint" style="margin:0">Saltar: cada parte aparece uma vez e a tela vai até o refrão quando ele volta. Corrido: as repetições aparecem escritas em sequência.</p></div>
+      <div class="campo"><span>Tamanho da letra no palco</span><div class="opcoes" id="pref-letra"></div></div>
+      <label>Espera antes de rolar, em músicas novas (segundos)<input type="text" id="pref-intro" inputmode="numeric" placeholder="0"></label>
+    </section>
   </div>
 </div>
 
@@ -759,7 +822,7 @@ function svgBtn(path, label, cls="btn icon-btn"){
 
 /* ---------- Armazenamento: banco do artefato (por pessoa) ou navegador ---------- */
 const LS_KEY = "cifra-no-palco-v1";
-const estado = { musicas: new Map(), setlist: [], pronto: false };
+const estado = { musicas: new Map(), setlist: [], pronto: false, excluidas: {}, perfilT: 0 };
 const store = {
   modo: "local", db: null, uid: null, col: null,
   async iniciar(){
@@ -783,7 +846,7 @@ const store = {
         }
         estado.pronto = true; renderTudo();
       }, () => { clearTimeout(timer); this.usarLocal("Sem acesso à nuvem. Salvando neste aparelho."); });
-      $("storage").textContent = "Salvo na sua conta";
+      atualizarStatus();
     } else {
       this.usarLocal("Salvo neste aparelho");
     }
@@ -795,36 +858,43 @@ const store = {
     estado.musicas.clear();
     for (const m of (dados?.musicas || [])) estado.musicas.set(m.id, m);
     estado.setlist = dados?.setlist || [];
+    estado.excluidas = dados?.excluidas || {};
+    estado.perfilT = dados?.perfilT || 0;
     estado.pronto = true;
-    $("storage").textContent = msg;
+    atualizarStatus();
+    if (msg !== "Salvo neste aparelho") $("storage").textContent = msg;
     renderTudo();
+    nuvem.agendar(200);
   },
   gravarLocal(){
-    try { localStorage.setItem(LS_KEY, JSON.stringify({ musicas:[...estado.musicas.values()], setlist: estado.setlist })); } catch {}
+    try { localStorage.setItem(LS_KEY, JSON.stringify({ musicas:[...estado.musicas.values()], setlist: estado.setlist, excluidas: estado.excluidas, perfilT: estado.perfilT })); } catch {}
   },
   async salvarMusica(m){
-    estado.musicas.set(m.id, m); renderTudo();
+    m = { ...m, atualizada: Date.now() };
+    estado.musicas.set(m.id, m); delete estado.excluidas[m.id]; renderTudo();
     if (this.modo === "db"){
       const { id, ...corpo } = m;
       try { await this.col.doc(id).set({ ...corpo, tipo:"musica" }); }
       catch (e) { toast("Não deu para salvar na nuvem. Guardado neste aparelho."); this.usarLocalMantendo(); }
-    } else this.gravarLocal();
+    } else { this.gravarLocal(); nuvem.agendar(); }
   },
   async excluirMusica(id){
     estado.musicas.delete(id); estado.setlist = estado.setlist.filter((x) => x !== id); renderTudo();
+    estado.excluidas[id] = Date.now(); estado.perfilT = Date.now();
     if (this.modo === "db"){
       try { await this.col.doc(id).delete(); await this.col.doc("setlist").set({ ids: estado.setlist }); } catch { toast("Falha ao excluir na nuvem."); }
-    } else this.gravarLocal();
+    } else { this.gravarLocal(); nuvem.agendar(); }
   },
   async salvarSetlist(){
+    estado.perfilT = Date.now();
     renderTudo();
     if (this.modo === "db"){
       try { await this.col.doc("setlist").set({ ids: estado.setlist }); } catch { toast("Falha ao salvar o setlist."); }
-    } else this.gravarLocal();
+    } else { this.gravarLocal(); nuvem.agendar(); }
   },
   usarLocalMantendo(){
     this.modo = "local"; try { this.unsub && this.unsub(); } catch {}
-    $("storage").textContent = "Salvo neste aparelho"; this.gravarLocal();
+    this.gravarLocal(); atualizarStatus();
   }
 };
 
@@ -996,7 +1066,7 @@ function abrirEditor(id, pre){
   $("f-artista").value = d.artista || "";
   $("f-tom").value = d.tom || "";
   $("f-duracao").value = d.duracao ? fmtTempo(d.duracao) : "";
-  $("f-intro").value = d.intro ? String(d.intro) : "";
+  $("f-intro").value = d.intro ? String(d.intro) : (!m && !pre && prefs.intro ? String(prefs.intro) : "");
   $("f-texto").value = d.texto || "";
   edRoteiro = Array.isArray(d.roteiro) ? d.roteiro.slice() : null;
   renderRoteiroEditor();
@@ -1384,7 +1454,7 @@ function fonteAuto(){
   return Math.max(13, Math.min(34, Math.floor(larg / (maior * 0.64))));
 }
 function aplicarFonte(){
-  $("p-cifra").style.fontSize = (P.fonte || fonteAuto()) + "px";
+  $("p-cifra").style.fontSize = (P.fonte || Math.round(fonteAuto() * escalaLetra())) + "px";
   if (P.modo === "salto"){ const k = P.passos[P.passo]; calcularPassos(); if (k && P.passos[P.passo]) { /* mantém o passo atual */ } }
 }
 function durTotal(){ return (P.m.duracao || 180) + P.durExtra; }
@@ -1528,7 +1598,7 @@ function sairPalco(){
 }
 function trocarModo(){
   modoPreferido = P.modo === "salto" ? "corrido" : "salto";
-  try { localStorage.setItem("modo-rolagem", modoPreferido); } catch {}
+  definirPref("modo", modoPreferido);
   const parte = parteAtual();
   P.modo = modoPreferido; P.anim = null;
   renderCifra(); calcularPassos();
@@ -1588,6 +1658,267 @@ document.addEventListener("keydown", (e) => {
   else if (k === "Escape"){ sairPalco(); }
 });
 
+/* ---------- Preferências do app ---------- */
+const CORES = [
+  { id: "ambar", nome: "Âmbar", cor: "#f3b544" },
+  { id: "coral", nome: "Coral", cor: "#ff8a65" },
+  { id: "verde", nome: "Verde", cor: "#62d394" },
+  { id: "azul", nome: "Azul", cor: "#6cb6ff" },
+  { id: "lilas", nome: "Lilás", cor: "#c4a2ff" },
+];
+const LETRAS = [ { id: "normal", nome: "Normal", escala: 1 }, { id: "grande", nome: "Grande", escala: 1.2 }, { id: "enorme", nome: "Muito grande", escala: 1.4 } ];
+const PREFS_KEY = "cifra-prefs";
+let prefs = { nome: "", cor: "ambar", modo: "salto", letra: "normal", intro: 0 };
+try { prefs = { ...prefs, modo: localStorage.getItem("modo-rolagem") || "salto", ...JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") }; } catch {}
+
+function escalaLetra(){ return (LETRAS.find((l) => l.id === prefs.letra) || LETRAS[0]).escala; }
+function aplicarPrefs(){
+  const c = (CORES.find((x) => x.id === prefs.cor) || CORES[0]).cor;
+  document.documentElement.style.setProperty("--accent", c);
+  document.documentElement.style.setProperty("--chord", c);
+  modoPreferido = prefs.modo === "corrido" ? "corrido" : "salto";
+  atualizarStatus();
+  if (!$("conta").hidden) renderPrefs();
+}
+// Muda uma preferência, guarda no aparelho e (com login) na conta.
+function definirPref(chave, valor){
+  prefs = { ...prefs, [chave]: valor };
+  try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch {}
+  estado.perfilT = Date.now(); store.gravarLocal(); nuvem.agendar();
+  aplicarPrefs();
+}
+function botoesEscolha(caixa, opcoes, atual, aoEscolher){
+  caixa.textContent = "";
+  for (const o of opcoes){
+    const b = document.createElement("button"); b.type = "button"; b.className = "opcao"; b.textContent = o.nome;
+    b.setAttribute("aria-pressed", o.id === atual);
+    b.onclick = () => aoEscolher(o.id);
+    caixa.append(b);
+  }
+}
+function renderPrefs(){
+  if (document.activeElement !== $("pref-nome")) $("pref-nome").value = prefs.nome || "";
+  if (document.activeElement !== $("pref-intro")) $("pref-intro").value = prefs.intro ? String(prefs.intro) : "";
+  const cores = $("pref-cores"); cores.textContent = "";
+  for (const c of CORES){
+    const b = document.createElement("button"); b.type = "button"; b.className = "cor"; b.style.setProperty("--c", c.cor);
+    b.setAttribute("aria-label", c.nome); b.title = c.nome; b.setAttribute("aria-pressed", c.id === prefs.cor);
+    b.onclick = () => definirPref("cor", c.id);
+    cores.append(b);
+  }
+  botoesEscolha($("pref-modo"), [{ id: "salto", nome: "Saltar" }, { id: "corrido", nome: "Corrido" }], prefs.modo, (v) => definirPref("modo", v));
+  botoesEscolha($("pref-letra"), LETRAS, prefs.letra, (v) => definirPref("letra", v));
+}
+$("pref-nome").addEventListener("change", () => definirPref("nome", $("pref-nome").value.trim().slice(0, 60)));
+$("pref-intro").addEventListener("change", () => definirPref("intro", Math.max(0, Math.min(60, parseInt($("pref-intro").value, 10) || 0))));
+
+/* ---------- Conta com email: login e sincronização (app instalado) ---------- */
+const SUPA_URL = "https://aqcvbztnpqsdurdpcsef.supabase.co";
+// Chave pública (anon) do projeto: pode ficar no app; a segurança vem das regras RLS do banco.
+const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY3ZienRucHFzZHVyZHBjc2VmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU3MDAwNTMsImV4cCI6MjExMTI3NjA1M30.aGZYWuTyl6yBwhkam7ISnX0Kca03AL6b3XSB30YC46E";
+const ENDERECO_APP = "https://szadil763.github.io/cifras-show/";
+const noClaude = window.self !== window.top;
+
+const nuvem = {
+  sb: null, user: null, t: null, rodando: false, pendente: false, ultima: 0, erro: "", indisponivel: false, recuperando: false,
+  iniciar(){
+    if (noClaude){ this.indisponivel = true; renderConta(); return; }
+    const s = document.createElement("script");
+    s.src = "vendor/supabase-js-2.45.4.js";
+    s.onload = () => {
+      try {
+        this.sb = window.supabase.createClient(SUPA_URL, SUPA_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+      } catch { this.indisponivel = true; renderConta(); return; }
+      this.sb.auth.onAuthStateChange((ev, sessao) => {
+        this.user = sessao?.user || null;
+        if (ev === "PASSWORD_RECOVERY"){ this.recuperando = true; abrirConta(); }
+        if (ev === "SIGNED_OUT"){ this.ultima = 0; this.erro = ""; }
+        renderConta(); atualizarStatus();
+        if (this.user && (ev === "SIGNED_IN" || ev === "INITIAL_SESSION")) this.agendar(200);
+      });
+    };
+    s.onerror = () => { this.indisponivel = true; renderConta(); };
+    document.head.append(s);
+    window.addEventListener("online", () => this.agendar(500));
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && Date.now() - this.ultima > 30000) this.agendar(500); });
+  },
+  agendar(ms = 1500){
+    if (!this.sb || !this.user || store.modo !== "local") return;
+    if (this.rodando){ this.pendente = true; return; }
+    clearTimeout(this.t); this.t = setTimeout(() => this.sincronizar(), ms);
+  },
+  async sincronizar(){
+    if (!this.sb || !this.user || this.rodando || store.modo !== "local") return;
+    this.rodando = true; atualizarStatus(); renderConta();
+    try {
+      const uid = this.user.id;
+      const { data: linhas, error } = await this.sb.from("musicas").select("id,dados,atualizada,excluida");
+      if (error) throw error;
+      const { data: perfil, error: e2 } = await this.sb.from("perfis").select("setlist,preferencias,atualizado").maybeSingle();
+      if (e2) throw e2;
+      const remotos = new Map(linhas.map((r) => [r.id, { ...r, t: Date.parse(r.atualizada) }]));
+      const enviar = []; let mudou = false;
+      // 1) O que veio da nuvem: vale a versão mais recente.
+      for (const r of remotos.values()){
+        const loc = estado.musicas.get(r.id), apagada = estado.excluidas[r.id] || 0;
+        if (r.excluida){
+          if (loc && (loc.atualizada || 0) <= r.t){ estado.musicas.delete(r.id); estado.setlist = estado.setlist.filter((x) => x !== r.id); mudou = true; }
+          if (!loc) estado.excluidas[r.id] = Math.max(apagada, r.t);
+          continue;
+        }
+        if (apagada && apagada >= r.t) continue;
+        if (!loc || r.t > (loc.atualizada || 0)){
+          estado.musicas.set(r.id, { ...(r.dados || {}), id: r.id, atualizada: r.t });
+          delete estado.excluidas[r.id]; mudou = true;
+        }
+      }
+      // 2) O que mudou no aparelho sobe para a nuvem.
+      for (const m of estado.musicas.values()){
+        const r = remotos.get(m.id), t = m.atualizada || Date.now();
+        if (!r || t > r.t){ const { id, ...dados } = m; enviar.push({ user_id: uid, id, dados, atualizada: new Date(t).toISOString(), excluida: false }); }
+      }
+      for (const [id, t] of Object.entries(estado.excluidas)){
+        if (estado.musicas.has(id)){ delete estado.excluidas[id]; continue; }
+        const r = remotos.get(id);
+        if (r && !r.excluida && r.t > t) continue;
+        if (!r || !r.excluida) enviar.push({ user_id: uid, id, dados: {}, atualizada: new Date(t).toISOString(), excluida: true });
+      }
+      for (let i = 0; i < enviar.length; i += 100){
+        const { error: e3 } = await this.sb.from("musicas").upsert(enviar.slice(i, i + 100), { onConflict: "user_id,id" });
+        if (e3) throw e3;
+      }
+      // 3) Setlist e preferências.
+      const tp = perfil ? Date.parse(perfil.atualizado) : 0;
+      if (perfil && tp > (estado.perfilT || 0)){
+        estado.setlist = Array.isArray(perfil.setlist) ? perfil.setlist.filter((x) => typeof x === "string") : [];
+        const p = perfil.preferencias && typeof perfil.preferencias === "object" ? perfil.preferencias : {};
+        prefs = { ...prefs, ...p };
+        try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch {}
+        estado.perfilT = tp; mudou = true; aplicarPrefs();
+      } else if (!perfil || (estado.perfilT || 0) > tp){
+        const t = estado.perfilT || Date.now();
+        const { error: e4 } = await this.sb.from("perfis").upsert({ user_id: uid, setlist: estado.setlist, preferencias: prefs, atualizado: new Date(t).toISOString() });
+        if (e4) throw e4;
+        estado.perfilT = t;
+      }
+      store.gravarLocal();
+      if (mudou) renderTudo();
+      this.ultima = Date.now(); this.erro = "";
+    } catch (e) {
+      this.erro = navigator.onLine === false ? "Sem internet. As mudanças ficam no aparelho e sobem quando a conexão voltar." : "Não foi possível sincronizar agora. O app tenta de novo sozinho.";
+    } finally {
+      this.rodando = false; atualizarStatus(); renderConta();
+      if (this.pendente){ this.pendente = false; this.agendar(300); }
+    }
+  },
+};
+
+function atualizarStatus(){
+  const el = $("storage"); if (!el) return;
+  let s;
+  if (store.modo === "db") s = "Salvo na sua conta Claude";
+  else if (nuvem.user) s = nuvem.rodando ? "Sincronizando…" : (nuvem.erro ? "Salvo no aparelho, sincroniza depois" : "Sincronizado na sua conta");
+  else s = "Salvo neste aparelho";
+  el.textContent = s;
+  $("saudacao").textContent = prefs.nome ? "Repertório de " + prefs.nome : "";
+  $("saudacao").hidden = !prefs.nome;
+}
+
+const ERROS_CONTA = {
+  invalid_credentials: "Email ou senha incorretos.",
+  email_not_confirmed: "Falta confirmar o email. Abra a mensagem que enviamos, toque no link de confirmação e depois entre aqui.",
+  user_already_exists: "Já existe uma conta com esse email. Toque em Entrar.",
+  weak_password: "Senha fraca. Use pelo menos 6 caracteres.",
+  over_email_send_rate_limit: "Muitos emails enviados em pouco tempo. Espere alguns minutos e tente de novo.",
+  over_request_rate_limit: "Muitas tentativas seguidas. Espere um pouco e tente de novo.",
+  same_password: "A nova senha precisa ser diferente da anterior.",
+};
+function erroConta(e){
+  const code = e?.code || "";
+  if (ERROS_CONTA[code]) return ERROS_CONTA[code];
+  const msg = String(e?.message || "").toLowerCase();
+  if (msg.includes("invalid login")) return ERROS_CONTA.invalid_credentials;
+  if (msg.includes("not confirmed")) return ERROS_CONTA.email_not_confirmed;
+  if (msg.includes("already registered")) return ERROS_CONTA.user_already_exists;
+  if (msg.includes("rate limit")) return ERROS_CONTA.over_email_send_rate_limit;
+  if (msg.includes("password")) return "Senha inválida. Use pelo menos 6 caracteres.";
+  if (msg.includes("fetch") || navigator.onLine === false) return "Sem conexão com a internet. Tente de novo quando estiver online.";
+  return "Não deu certo agora. Tente de novo em instantes.";
+}
+function msgConta(texto, erro){ const m = $("c-msg"); m.textContent = texto; m.className = "notice" + (erro ? " err" : ""); m.hidden = !texto; }
+function renderConta(){
+  if (!$("c-email")) return;
+  const fora = !nuvem.user && !nuvem.indisponivel && !nuvem.recuperando;
+  $("conta-indisp").hidden = !nuvem.indisponivel;
+  $("conta-fora").hidden = !fora;
+  $("conta-dentro").hidden = !nuvem.user || nuvem.recuperando;
+  $("conta-nova").hidden = !nuvem.recuperando;
+  if (nuvem.user){
+    $("c-quem").textContent = nuvem.user.email || "";
+    $("c-sync").textContent = nuvem.rodando ? "Sincronizando…" : nuvem.erro ? nuvem.erro
+      : nuvem.ultima ? "Tudo sincronizado às " + new Date(nuvem.ultima).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) + ". " + estado.musicas.size + " músicas na conta." : "";
+  }
+  $("btn-conta").classList.toggle("logado", !!nuvem.user);
+}
+function abrirConta(){ msgConta(""); renderConta(); renderPrefs(); $("conta").hidden = false; $("conta").scrollTop = 0; }
+function credenciais(){
+  const email = $("c-email").value.trim(), senha = $("c-senha").value;
+  if (!/^\S+@\S+\.\S+$/.test(email)){ msgConta("Digite um email válido.", true); $("c-email").focus(); return null; }
+  return { email, senha };
+}
+async function acaoConta(botao, fn){
+  if (!nuvem.sb){ msgConta("O login ainda está carregando. Confira a internet e tente de novo.", true); return; }
+  const txt = botao.textContent; botao.disabled = true; botao.textContent = "Aguarde…";
+  try { await fn(); } catch (e) { msgConta(erroConta(e), true); } finally { botao.disabled = false; botao.textContent = txt; }
+}
+$("btn-conta").onclick = abrirConta;
+$("conta-fechar").onclick = () => { $("conta").hidden = true; };
+$("c-entrar").onclick = () => acaoConta($("c-entrar"), async () => {
+  const c = credenciais(); if (!c) return;
+  if (c.senha.length < 6){ msgConta("Digite sua senha (mínimo de 6 caracteres).", true); return; }
+  const { error } = await nuvem.sb.auth.signInWithPassword({ email: c.email, password: c.senha });
+  if (error) throw error;
+  $("c-senha").value = "";
+  msgConta("Pronto! Suas músicas deste aparelho estão subindo para a conta.");
+});
+$("c-criar").onclick = () => acaoConta($("c-criar"), async () => {
+  const c = credenciais(); if (!c) return;
+  if (c.senha.length < 6){ msgConta("Crie uma senha com pelo menos 6 caracteres.", true); $("c-senha").focus(); return; }
+  const { data, error } = await nuvem.sb.auth.signUp({ email: c.email, password: c.senha, options: { emailRedirectTo: ENDERECO_APP } });
+  if (error) throw error;
+  if (data.session){ msgConta("Conta criada e conectada."); $("c-senha").value = ""; }
+  else msgConta("Conta criada! Enviamos um link de confirmação para " + c.email + ". Abra o email, toque no link e depois volte aqui e toque em Entrar.");
+});
+$("c-esqueci").onclick = () => acaoConta($("c-esqueci"), async () => {
+  const email = $("c-email").value.trim();
+  if (!/^\S+@\S+\.\S+$/.test(email)){ msgConta("Digite seu email no campo acima e toque de novo em Esqueci minha senha.", true); $("c-email").focus(); return; }
+  const { error } = await nuvem.sb.auth.resetPasswordForEmail(email, { redirectTo: ENDERECO_APP });
+  if (error) throw error;
+  msgConta("Enviamos um link para " + email + ". Ele abre o app e pede a nova senha.");
+});
+$("c-salvar-senha").onclick = () => acaoConta($("c-salvar-senha"), async () => {
+  const s = $("c-nova").value;
+  if (s.length < 6){ msgConta("A nova senha precisa ter pelo menos 6 caracteres.", true); return; }
+  const { error } = await nuvem.sb.auth.updateUser({ password: s });
+  if (error) throw error;
+  nuvem.recuperando = false; $("c-nova").value = ""; renderConta();
+  msgConta("Senha alterada. Você está conectado.");
+  nuvem.agendar(200);
+});
+$("c-sinc").onclick = () => { nuvem.agendar(0); };
+let sairArmado = false;
+$("c-sair").onclick = async () => {
+  const b = $("c-sair");
+  if (!sairArmado){ sairArmado = true; b.textContent = "Toque de novo para sair"; setTimeout(() => { sairArmado = false; b.textContent = "Sair da conta"; }, 3000); return; }
+  sairArmado = false; b.textContent = "Sair da conta";
+  try { await nuvem.sb.auth.signOut(); } catch {}
+  msgConta("Você saiu. As músicas continuam neste aparelho; para vê-las em outro, entre com a mesma conta.");
+};
+
+aplicarPrefs();
+nuvem.iniciar();
+
+
 /* ---------- App instalável (PWA) ---------- */
 const instalado = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 let pedidoInstalar = null;
@@ -1604,7 +1935,7 @@ const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platfo
 let dicaVista = false; try { dicaVista = localStorage.getItem("dica-ios") === "1"; } catch {}
 if (ehIOS && !instalado && !dicaVista && !dentroDeFrame) $("ios-dica").hidden = false;
 $("ios-fechar").onclick = () => { $("ios-dica").hidden = true; try { localStorage.setItem("dica-ios", "1"); } catch {} };
-const VERSAO_APP = "v6 · saltos";
+const VERSAO_APP = "v7 · conta";
 if ("serviceWorker" in navigator && location.protocol === "https:" && !dentroDeFrame) {
   const tinhaControle = !!navigator.serviceWorker.controller;
   let recarregou = false;
