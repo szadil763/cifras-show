@@ -255,6 +255,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
       <a class="btn" id="web-g" target="_blank" rel="noopener">No Google</a>
     </div>
     <ul class="list" id="lista"></ul>
+    <p class="hint" id="versao" style="margin-top:24px;text-align:center"></p>
   </section>
 
   <section id="view-set" hidden>
@@ -300,6 +301,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
           <strong>Roteiro da música</strong>
           <span class="hint" id="roteiro-modo"></span>
         </div>
+        <p class="notice" id="roteiro-vazio" style="margin:0" hidden>Esta cifra ainda não tem partes marcadas, então o palco rola tudo direto. Marque as partes com uma linha entre colchetes, por exemplo <b>[Primeira Parte]</b> e <b>[Refrão]</b>. Onde o refrão se repete, escreva só <b>[Refrão]</b> ou <b>Refrão 2x</b>.</p>
         <div class="roteiro-chips" id="roteiro-chips"></div>
         <div class="roteiro-add" id="roteiro-add"></div>
         <p class="hint" style="margin:0">O palco segue esta ordem. Escreva a parte uma vez só e indique a repetição com <b>[Refrão]</b>, <b>Refrão 2x</b> ou <b>(2x)</b> depois da estrofe: o app volta ao trecho certo sozinho.</p>
@@ -953,8 +955,9 @@ function renderRoteiroEditor(){
   if (edRoteiro) edRoteiro = edRoteiro.filter((k) => est.defs.has(k));
   if (edRoteiro && !edRoteiro.length) edRoteiro = null;
   const ordem = edRoteiro || est.auto;
-  const box = $("roteiro");
-  box.hidden = est.defs.size < 2 && ordem.length < 2;
+  const semPartes = !est.defs.size || (est.defs.size === 1 && est.defs.has("inicio"));
+  $("roteiro-vazio").hidden = !semPartes;
+  $("roteiro-chips").hidden = semPartes; $("roteiro-add").hidden = semPartes;
   const chips = $("roteiro-chips"); chips.textContent = "";
   ordem.forEach((k, i) => {
     const c = document.createElement("span"); c.className = "rchip";
@@ -977,7 +980,7 @@ function renderRoteiroEditor(){
     const r = document.createElement("button"); r.type = "button"; r.className = "linkbtn"; r.textContent = "voltar ao automático";
     r.onclick = () => { edRoteiro = null; renderRoteiroEditor(); };
     modo.append(r);
-  } else modo.textContent = "Lido da cifra automaticamente";
+  } else modo.textContent = semPartes ? "" : "Lido da cifra automaticamente";
 }
 $("f-texto").addEventListener("input", () => { clearTimeout(roteiroT); roteiroT = setTimeout(renderRoteiroEditor, 350); });
 function abrirEditor(id, pre){
@@ -1451,9 +1454,23 @@ const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platfo
 let dicaVista = false; try { dicaVista = localStorage.getItem("dica-ios") === "1"; } catch {}
 if (ehIOS && !instalado && !dicaVista && !dentroDeFrame) $("ios-dica").hidden = false;
 $("ios-fechar").onclick = () => { $("ios-dica").hidden = true; try { localStorage.setItem("dica-ios", "1"); } catch {} };
-if ("serviceWorker" in navigator && location.protocol === "https:") {
-  navigator.serviceWorker.register("sw.js").catch(() => {});
+const VERSAO_APP = "v5 · roteiro";
+if ("serviceWorker" in navigator && location.protocol === "https:" && !dentroDeFrame) {
+  const tinhaControle = !!navigator.serviceWorker.controller;
+  let recarregou = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    // Versão nova instalada: recarrega uma vez, só se não estiver no meio de uma música.
+    if (recarregou || !tinhaControle) return;
+    if (!$("palco").hidden || !$("editor").hidden || !$("colar").hidden){ toast("Versão nova pronta. Ela abre na próxima vez que você entrar no app."); return; }
+    recarregou = true; location.reload();
+  });
+  navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then((reg) => {
+    reg.update().catch(() => {});
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}); });
+  }).catch(() => {});
 }
+
+$("versao").textContent = "Cifra no Palco " + VERSAO_APP;
 
 /* ---------- Início ---------- */
 renderTudo();
