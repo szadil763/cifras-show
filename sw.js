@@ -1,5 +1,5 @@
 // Service worker: guarda o app no aparelho para funcionar sem internet no bar.
-const VERSAO = "cifra-palco-v1";
+const VERSAO = "cifra-palco-v2";
 const ARQUIVOS = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {

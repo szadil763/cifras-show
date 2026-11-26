@@ -79,6 +79,12 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 /* Ações principais */
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
 .actions .btn{min-height:56px;font-size:16px}
+.web{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin:-4px 0 12px}
+.web-q{flex:1 1 100%;font-size:14px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.web-q b{color:var(--fg)}
+.web a.btn{text-decoration:none;flex:1 1 auto;min-height:40px;padding:8px 12px;font-size:14px}
+.volta{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between;margin:0 0 12px}
+.colar-area{min-height:40vh}
 .search{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:12px}
 
 /* Lista de músicas */
@@ -213,10 +219,19 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
       </button>
       <button class="btn" id="btn-nova">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-        Digitar ou colar
+        Colar cifra
       </button>
     </div>
-    <input class="search" id="busca" type="text" placeholder="Buscar por música ou artista" aria-label="Buscar">
+    <div class="notice volta" id="volta" hidden>
+      <span>Copiou a cifra no navegador?</span>
+      <span style="display:flex;gap:8px"><button class="btn ghost" id="volta-nao" style="min-height:36px">Agora não</button><button class="btn primary" id="volta-colar" style="min-height:36px">Colar agora</button></span>
+    </div>
+    <input class="search" id="busca" type="search" placeholder="Buscar música ou artista" aria-label="Buscar música ou artista" enterkeyhint="search">
+    <div class="web" id="web" hidden>
+      <span class="web-q">Procurar <b id="web-termo"></b> na internet:</span>
+      <a class="btn" id="web-cc" target="_blank" rel="noopener">No Cifra Club</a>
+      <a class="btn" id="web-g" target="_blank" rel="noopener">No Google</a>
+    </div>
     <ul class="list" id="lista"></ul>
   </section>
 
@@ -270,6 +285,36 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
   </div>
 </div>
 
+<!-- Colar cifra -->
+<div class="sheet" id="colar" hidden>
+  <div class="sheet-head"><div class="sheet-head-inner">
+    <button class="btn ghost icon-btn" id="colar-fechar" aria-label="Voltar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <h2>Colar cifra</h2>
+    <button class="btn primary" id="colar-ok">Organizar</button>
+  </div></div>
+  <div class="wrap">
+    <div class="form">
+      <p class="hint" style="margin:0">Copie a cifra no site (pode copiar a página toda, com título e tom) e cole abaixo. O app tira propagandas e menus, encontra o tom, marca as partes e deixa os acordes em cima da letra. Você confere antes de salvar.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="colar-clip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="4" width="10" height="4" rx="1"/><path d="M8 6H6a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2"/></svg>
+          Colar do que copiei
+        </button>
+        <button class="btn ghost" id="colar-zero">Digitar do zero</button>
+      </div>
+      <label>Texto copiado
+        <textarea id="colar-txt" class="colar-area" spellcheck="false" placeholder="Toque e segure aqui e escolha Colar"></textarea>
+      </label>
+      <div class="notice err" id="colar-erro" hidden></div>
+      <div class="form-actions" id="colar-ia-box" hidden>
+        <span class="hint" style="flex:1;min-width:200px">Acordes desalinhados depois de colar? A IA reorganiza o texto.</span>
+        <button class="btn" id="colar-ia">Organizar com IA</button>
+      </div>
+      <div class="reading" id="colar-lendo" hidden><span class="spinner"></span><span>Organizando com IA…</span><button class="btn" id="colar-parar">Parar</button></div>
+    </div>
+  </div>
+</div>
+
 <!-- Foto → Cifra -->
 <div class="sheet" id="foto" hidden>
   <div class="sheet-head"><div class="sheet-head-inner">
@@ -277,7 +322,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
     <h2>Foto → Cifra</h2>
   </div></div>
   <div class="wrap">
-    <div class="notice err" id="foto-indisp" hidden>A leitura por foto ainda não funciona no app instalado: ela usa a IA da conta Claude e só roda na versão do claude.ai. Por enquanto, use “Digitar ou colar”.</div>
+    <div class="notice err" id="foto-indisp" hidden>A leitura por foto ainda não funciona no app instalado: ela usa a IA da conta Claude e só roda na versão do claude.ai. Por enquanto, use “Colar cifra”.</div>
     <div class="drop" id="drop">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
       <strong>Fotografe a cifra ou escolha da galeria</strong>
@@ -473,6 +518,75 @@ function chordProParaTexto(texto){
   }).join("\n");
 }
 
+/* ---------- Colar inteligente: limpa e organiza uma cifra copiada da internet ---------- */
+const LIXO_RE = /^(publicidade|an[uú]ncio|patrocinado|cifra ?club|cifraclub\.com\.br|imprimir|enviar|corrigir|salvar|favoritar|compartilhar|exibir cifra.*|simplificar( cifra)?|cifra simplificada|auto ?rolagem|rolagem autom[aá]tica|texto|dicion[aá]rio|tom|afinador|videoaula.*|ver (mais|todas|v[ií]deo).*|aprenda.*|baixe.*|assine.*|seja pro.*|pro|mostrar.*|ocultar.*|voltar ao topo|\d[\d.,]*\s*(mil\s*)?(exibi[cç][oõ]es|views|visualiza[cç][oõ]es)|enviada por.*|revisad[ao] por.*|vers[aã]o \d+ de \d+|principal|tablatura|cifra|letra|acordes|diagramas?|mudar tom|meio tom( acima| abaixo)?|[-+]\s*(½|1\/2)?\s*tom|[-+]|login|entrar|cadastre-se|sobre|ouvir|play|tocar|repetir|instrumento:?.*|viol[aã]o|guitarra|cavaco|ukulele|teclado|baixo|capo|★+|☆+|\d(\.\d)?\s*\/\s*5|[A-G][#b]?\S*\s*[:=]\s*[x\d]{6}|[x\d ]{6,11})$/i;
+const FIM_RE = /^(composi[cç][aã]o( de| por)?\b|colabora[cç][aã]o e revis[aã]o|coment[aá]rios\b|\d+\s+coment[aá]rios|videoaulas?\b|veja tamb[eé]m|mais (m[uú]sicas|cifras|tocadas)\b|outras m[uú]sicas|m[uú]sicas relacionadas|playlists?\b)/i;
+const SECAO_RE = /^\s*[\[(]?\s*(intro(?:du[cç][aã]o)?|refr[aã]o(?:\s*\d+)?|pr[eé][- ]?refr[aã]o|ponte|solo|final|primeira parte|segunda parte|terceira parte|parte \d+|verso(?:\s*\d+)?|estrofe(?:\s*\d+)?|interl[uú]dio|passagem|riff|outro)\s*[\])]?\s*:?\s*(.*)$/i;
+
+function capitalizar(s){ s = s.trim().toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function limparCifra(bruto, dica){
+  let txt = String(bruto || "")
+    .replace(/\r\n?/g, "\n").replace(/\t/g, "    ")
+    .replace(/[   ]/g, " ").replace(/[​-‍﻿]/g, "");
+  txt = chordProParaTexto(txt);
+  let linhas = txt.split("\n").map((l) => l.replace(/\s+$/, ""));
+  let tom = "", capo = "", afinacao = "";
+  const cabecalho = [];
+  let inicio = -1, removidas = 0;
+  // Encontra onde a cifra começa: primeira linha de acordes, parte ou tablatura.
+  for (let i = 0; i < linhas.length; i++){
+    const l = linhas[i], t = l.trim();
+    if (!t) continue;
+    let m;
+    if ((m = /^tom:?\s*([A-G](?:#|b)?m?)\b/i.exec(t))){ tom = tom || m[1].charAt(0).toUpperCase() + m[1].slice(1); continue; }
+    if ((m = /^capo(?:traste)?[^\d]*(\d+)/i.exec(t))){ capo = m[1]; continue; }
+    if ((m = /^afina[cç][aã]o:?\s*(.*)$/i.exec(t))){ afinacao = m[1]; continue; }
+    if (ehLinhaAcordes(l) || /^\[[^\]]+\]/.test(t) || /^\s*[eBGDAE]\s*[|:]/.test(l) || (SECAO_RE.test(t) && (!SECAO_RE.exec(t)[2] || ehLinhaAcordes(SECAO_RE.exec(t)[2])))){ inicio = i; break; }
+    if (!LIXO_RE.test(t) && !FIM_RE.test(t) && t.length <= 70) cabecalho.push(t); else removidas++;
+  }
+  if (inicio < 0) inicio = 0;
+  const saida = [];
+  for (let i = inicio; i < linhas.length; i++){
+    const l = linhas[i], t = l.trim();
+    if (FIM_RE.test(t)) { removidas += linhas.length - i; break; }
+    if (!t){ if (saida.length && saida[saida.length - 1] !== "") saida.push(""); continue; }
+    let m;
+    if ((m = /^tom:?\s*([A-G](?:#|b)?m?)\b/i.exec(t))){ tom = tom || m[1]; removidas++; continue; }
+    if (/^capo(?:traste)?[^\d]*(\d+)/i.test(t)){ capo = capo || /(\d+)/.exec(t)[1]; removidas++; continue; }
+    if (LIXO_RE.test(t) && !ehLinhaAcordes(l)){ removidas++; continue; }
+    const s = SECAO_RE.exec(t);
+    if (s && !/^\[/.test(t)){
+      const resto = s[2] || "";
+      if (!resto){ saida.push("[" + capitalizar(s[1]) + "]"); continue; }
+      if (ehLinhaAcordes(resto)){ saida.push("[" + capitalizar(s[1]) + "]", resto.trim()); continue; }
+    }
+    if (s && /^\[[^\]]+\]\s*\S/.test(t)){
+      // "[Intro] G D Em C" -> parte numa linha, acordes na outra
+      const mm = /^(\[[^\]]+\])\s*(.*)$/.exec(t);
+      if (ehLinhaAcordes(mm[2])){ saida.push(mm[1], mm[2].trim()); continue; }
+    }
+    saida.push(l);
+  }
+  while (saida.length && saida[saida.length - 1] === "") saida.pop();
+  // Tira recuo comum (cópias às vezes vêm com espaços à esquerda em todas as linhas).
+  const recuos = saida.filter((l) => l.trim()).map((l) => l.match(/^ */)[0].length);
+  const recuo = recuos.length ? Math.min(...recuos) : 0;
+  let texto = saida.map((l) => l.slice(recuo)).join("\n");
+  const extras = [];
+  if (capo && capo !== "0") extras.push("[Capotraste na " + capo + "ª casa]");
+  if (afinacao && !/padr[aã]o|^e\s*a\s*d\s*g\s*b\s*e$/i.test(afinacao.trim())) extras.push("[Afinação: " + afinacao.trim() + "]");
+  if (extras.length) texto = extras.join("\n") + "\n\n" + texto;
+  if (!tom){
+    const pl = saida.find((l) => ehLinhaAcordes(l));
+    const m = pl && /([A-G](?:#|b)?)(m(?!aj))?/.exec(pl.trim().split(/\s+/).find(ehAcorde) || "");
+    if (m) tom = m[1] + (m[2] || "");
+  }
+  let titulo = cabecalho[0] || "", artista = cabecalho[1] || "";
+  if (!titulo && dica){ titulo = dica; }
+  return { titulo, artista, tom, texto, removidas };
+}
+
 /* ---------- Utilidades ---------- */
 function fmtTempo(seg){ seg = Math.max(0, Math.round(seg||0)); return Math.floor(seg/60) + ":" + String(seg%60).padStart(2,"0"); }
 function lerTempo(txt){
@@ -591,11 +705,11 @@ function renderRepertorio(){
   if (!estado.pronto){ const li = document.createElement("li"); li.className = "empty"; li.textContent = "Carregando seu repertório…"; ul.append(li); return; }
   if (!todas.length){
     const li = document.createElement("li"); li.className = "empty";
-    li.innerHTML = `<strong>Seu repertório está vazio</strong><span>Tire foto de uma cifra, cole uma cifra que você já tem, ou carregue três músicas de folclore para testar o modo palco.</span>`;
+    li.innerHTML = `<strong>Seu repertório está vazio</strong><span>Digite o nome de uma música na busca acima para procurar a cifra na internet, cole uma cifra que você já tem, ou carregue três músicas de folclore para testar o modo palco.</span>`;
     const b = document.createElement("button"); b.className = "btn"; b.textContent = "Carregar músicas de exemplo";
     b.onclick = carregarExemplos; li.append(b); ul.append(li); return;
   }
-  if (!lista.length){ const li = document.createElement("li"); li.className = "empty"; li.textContent = "Nenhuma música encontrada."; ul.append(li); return; }
+  if (!lista.length){ const li = document.createElement("li"); li.className = "empty"; li.textContent = "Essa música ainda não está no seu repertório. Procure a cifra na internet pelos botões acima."; ul.append(li); return; }
   for (const m of lista){
     const li = document.createElement("li"); li.className = "song";
     const main = document.createElement("button"); main.className = "song-main"; main.setAttribute("aria-label", "Editar " + m.titulo);
@@ -645,7 +759,29 @@ function renderSetlist(){
   ol.append(p);
 }
 function renderTudo(){ renderRepertorio(); renderSetlist(); }
-$("busca").oninput = renderRepertorio;
+function linkBusca(q, soCifraClub){
+  const termo = q + " cifra" + (soCifraClub ? " site:cifraclub.com.br" : "");
+  return "https://www.google.com/search?q=" + encodeURIComponent(termo);
+}
+function atualizarBuscaWeb(){
+  const q = $("busca").value.trim();
+  $("web").hidden = q.length < 2;
+  if (q.length < 2) return;
+  $("web-termo").textContent = "“" + q + "”";
+  $("web-cc").href = linkBusca(q, true);
+  $("web-g").href = linkBusca(q, false);
+}
+let buscaWeb = null;
+for (const id of ["web-cc", "web-g"]) $(id).addEventListener("click", () => { buscaWeb = { q: $("busca").value.trim(), em: Date.now() }; });
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && buscaWeb && Date.now() - buscaWeb.em < 30 * 60 * 1000 && $("colar").hidden) $("volta").hidden = false;
+});
+$("volta-nao").onclick = () => { $("volta").hidden = true; buscaWeb = null; };
+$("volta-colar").onclick = () => { $("volta").hidden = true; abrirColar(true); };
+$("busca").oninput = () => { renderRepertorio(); atualizarBuscaWeb(); };
+$("busca").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && $("busca").value.trim().length >= 2 && !$("lista").querySelector(".song")) $("web-cc").click();
+});
 $("btn-show").onclick = () => abrirPalco(estado.setlist.slice(), 0);
 let limparArmado = false;
 $("btn-limpar-set").onclick = () => {
@@ -712,7 +848,71 @@ $("ed-excluir").onclick = () => {
   if (!excluirArmado){ excluirArmado = true; b.textContent = "Toque de novo para excluir"; setTimeout(() => { excluirArmado = false; b.textContent = "Excluir música"; }, 3000); return; }
   store.excluirMusica(editando); fecharEditor(); toast("Música excluída");
 };
-$("btn-nova").onclick = () => abrirEditor(null);
+$("btn-nova").onclick = () => abrirColar(false);
+
+/* ---------- Colar cifra ---------- */
+let ctlColar = null;
+function abrirColar(tentarClipboard){
+  $("colar-txt").value = ""; $("colar-erro").hidden = true; $("colar-lendo").hidden = true;
+  $("colar-ia-box").hidden = !(sample);
+  $("colar").hidden = false;
+  if (tentarClipboard) colarDoClipboard(); else setTimeout(() => $("colar-txt").focus(), 50);
+}
+async function colarDoClipboard(){
+  try {
+    const t = await navigator.clipboard.readText();
+    if (t && t.trim()){ $("colar-txt").value = t; organizarColado(); return; }
+    mostrarErroColar("Não há texto copiado. Copie a cifra no navegador e tente de novo, ou toque e segure no campo abaixo e escolha Colar.");
+  } catch {
+    mostrarErroColar("O celular não deixou o app ler o que você copiou. Toque e segure no campo abaixo e escolha Colar.");
+    $("colar-txt").focus();
+  }
+}
+function mostrarErroColar(msg){ const e = $("colar-erro"); e.textContent = msg; e.hidden = false; }
+function organizarColado(){
+  const bruto = $("colar-txt").value;
+  if (!bruto.trim()){ mostrarErroColar("Cole a cifra no campo antes de organizar."); return; }
+  const r = limparCifra(bruto, buscaWeb?.q || "");
+  if (!r.texto.trim()){ mostrarErroColar("Não encontrei uma cifra nesse texto. Confira se copiou a parte com os acordes e a letra."); return; }
+  $("colar").hidden = true; buscaWeb = null;
+  const partes = [];
+  if (r.removidas) partes.push(`${r.removidas} linha${r.removidas > 1 ? "s" : ""} de propaganda, menu ou rodapé removida${r.removidas > 1 ? "s" : ""}`);
+  if (r.tom) partes.push("tom " + r.tom);
+  abrirEditor(null, { titulo: r.titulo, artista: r.artista, tom: r.tom, texto: r.texto,
+    aviso: "Cifra organizada" + (partes.length ? " (" + partes.join(", ") + ")" : "") + ". Confira, preencha a duração e toque em Salvar." });
+}
+$("colar-fechar").onclick = () => { ctlColar?.abort(); $("colar").hidden = true; };
+$("colar-zero").onclick = () => { $("colar").hidden = true; abrirEditor(null); };
+$("colar-clip").onclick = colarDoClipboard;
+$("colar-ok").onclick = organizarColado;
+$("colar-txt").addEventListener("paste", () => { $("colar-erro").hidden = true; });
+
+const PROMPT_COLAR = `Você organiza cifras de violão. Abaixo está um texto copiado de um site de cifras: pode ter menus, propagandas, rodapé, e os acordes podem ter perdido o alinhamento.
+
+Responda APENAS com JSON, sem markdown: {"titulo": "", "artista": "", "tom": "", "cifra": ""}
+
+Regras para "cifra": formato "acordes em cima da letra"; cada acorde na coluna da sílaba onde é tocado, alinhado com espaços (nunca tabulação); partes em linhas próprias entre colchetes ([Intro], [Primeira Parte], [Refrão], [Solo], [Final]); mantenha tablaturas; remova tudo que não é a música (menus, propagandas, contagem de exibições, comentários, "composição de", diagramas de acordes). Não mude a letra nem os acordes; não invente nada.
+"tom": o tom indicado no texto; se não houver, o primeiro acorde.
+
+Texto copiado:
+`;
+$("colar-ia").onclick = async () => {
+  const bruto = $("colar-txt").value;
+  if (!bruto.trim()){ mostrarErroColar("Cole a cifra no campo antes de organizar."); return; }
+  if (!sample) return;
+  ctlColar = new AbortController(); $("colar-lendo").hidden = false; $("colar-erro").hidden = true;
+  try {
+    const r = await sample.json(PROMPT_COLAR + bruto.slice(0, 60000), { signal: ctlColar.signal, modelTier: "default" });
+    const cifra = typeof r?.cifra === "string" ? r.cifra.replace(/\t/g, "    ").replace(/\r/g, "") : "";
+    if (!cifra.trim()){ mostrarErroColar("A IA não encontrou uma cifra nesse texto."); return; }
+    $("colar").hidden = true; buscaWeb = null;
+    abrirEditor(null, { titulo: String(r.titulo || "").slice(0,120), artista: String(r.artista || "").slice(0,120), tom: String(r.tom || "").slice(0,12),
+      texto: chordProParaTexto(cifra), aviso: "Cifra organizada pela IA. Confira os acordes e a letra, preencha a duração e toque em Salvar." });
+  } catch (e) {
+    if (e?.code !== "cancelled") mostrarErroColar(ERROS_FOTO[e?.code] || "Não foi possível organizar agora. Use o botão Organizar.");
+  } finally { $("colar-lendo").hidden = true; ctlColar = null; }
+};
+$("colar-parar").onclick = () => ctlColar?.abort();
 
 // Cronômetro para medir a duração ouvindo a música
 let cronoIni = 0, cronoT = null;
@@ -736,6 +936,7 @@ async function iniciarSample(){
   atualizarFotoDisp();
 }
 function atualizarFotoDisp(){
+  if (!$("colar").hidden) $("colar-ia-box").hidden = !sample;
   const ok = !!(sample && limites?.images);
   $("foto-indisp").hidden = ok;
   $("drop").style.opacity = ok ? "" : ".45";
@@ -987,9 +1188,10 @@ $("btn-instalar").onclick = async () => {
   pedidoInstalar = null; $("btn-instalar").hidden = true;
 };
 window.addEventListener("appinstalled", () => { $("btn-instalar").hidden = true; toast("App instalado na tela inicial"); });
+const dentroDeFrame = window.self !== window.top;
 const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 let dicaVista = false; try { dicaVista = localStorage.getItem("dica-ios") === "1"; } catch {}
-if (ehIOS && !instalado && !dicaVista) $("ios-dica").hidden = false;
+if (ehIOS && !instalado && !dicaVista && !dentroDeFrame) $("ios-dica").hidden = false;
 $("ios-fechar").onclick = () => { $("ios-dica").hidden = true; try { localStorage.setItem("dica-ios", "1"); } catch {} };
 if ("serviceWorker" in navigator && location.protocol === "https:") {
   navigator.serviceWorker.register("sw.js").catch(() => {});

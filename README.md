@@ -16,6 +16,8 @@ Depois de instalado, o app abre em tela cheia e funciona **sem internet** (as m�
 - **Repertório**: cadastrar, colar e editar cifras no formato "acordes em cima da letra". Busca por música ou artista.
 - **Foto → Cifra**: tira foto da cifra (caderno, apostila, print) e a IA transcreve com os acordes alinhados. Você revisa antes de salvar.
   - Só funciona na versão publicada no claude.ai, que usa a IA da conta Claude do usuário. Abrindo o `index.html` direto, essa função fica desativada.
+- **Busca assistida**: digite o nome da música na busca. Se ela não está no repertório, o app oferece procurar a cifra no Cifra Club ou no Google. Ao voltar para o app, ele pergunta se você copiou a cifra e cola com um toque.
+- **Colar inteligente**: cole a página copiada inteira. O app tira propagandas, menus e rodapé, pega título, artista e tom, marca as partes ([Intro], [Refrão]…) e anota capotraste. Na versão do claude.ai há também o botão **Organizar com IA** para cifras que perderam o alinhamento.
 - **Modo palco**:
   - rolagem automática calculada pela duração da música, com espera de introdução e contagem regressiva;
   - velocidade + e − (fica salva por música);
