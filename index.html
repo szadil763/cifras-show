@@ -172,6 +172,28 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 .next-card div{flex:1;min-width:0}
 .next-card small{color:var(--muted);display:block;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
 .next-card b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mapa{display:flex;gap:6px;overflow-x:auto;padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line);background:#0b0e13;scrollbar-width:none}
+.mapa::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip.feito{color:color-mix(in srgb,var(--muted) 60%,transparent)}
+.bloco{padding-top:.15em}
+.bloco .s small{font-weight:600;opacity:.75;margin-left:.4em;letter-spacing:.04em}
+.bloco.extra .s{background:var(--accent)}
+.sheet-music .rep{font-family:var(--font-body);font-size:.62em;color:var(--accent);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:.3em 0}
+.btn-rep{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:0 12px;height:40px;font-weight:700;font-size:13px}
+.btn-rep svg{width:18px;height:18px}
+.roteiro{border:1px solid var(--line);border-radius:var(--r);padding:12px;display:grid;gap:10px;background:color-mix(in srgb,var(--surface) 50%,transparent)}
+.roteiro-top{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between}
+.roteiro-top strong{font-size:15px}
+.roteiro-chips,.roteiro-add{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rchip{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 4px 3px 10px;font-size:13px;font-weight:600}
+.rchip .n{font-family:var(--font-mono);color:var(--muted);font-size:11px;margin-right:4px}
+.rchip button{background:none;border:0;width:26px;height:26px;border-radius:50%;color:var(--muted);font-size:15px;line-height:1}
+.rchip button:hover{background:var(--surface-2);color:var(--fg)}
+.radd{border:1px dashed var(--line);background:none;border-radius:999px;padding:4px 10px;font-size:13px;color:var(--fg)}
+.radd:hover{border-color:var(--accent)}
+.linkbtn{background:none;border:0;color:var(--accent);font-weight:600;font-size:13px;padding:4px}
 .keys{font-size:12px;color:var(--muted);padding:6px 12px;text-align:center;border-top:1px solid var(--line);background:#0b0e13}
 .keys kbd{font-family:var(--font-mono);border:1px solid var(--line);border-radius:4px;padding:0 4px;font-size:11px}
 
@@ -273,6 +295,15 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
       <label>Cifra (acordes em cima da letra)
         <textarea id="f-texto" spellcheck="false" placeholder="[Intro]&#10;G  D  Em  C&#10;&#10;G                D&#10;Escreva a letra aqui com os acordes em cima"></textarea>
       </label>
+      <div class="roteiro" id="roteiro">
+        <div class="roteiro-top">
+          <strong>Roteiro da música</strong>
+          <span class="hint" id="roteiro-modo"></span>
+        </div>
+        <div class="roteiro-chips" id="roteiro-chips"></div>
+        <div class="roteiro-add" id="roteiro-add"></div>
+        <p class="hint" style="margin:0">O palco segue esta ordem. Escreva a parte uma vez só e indique a repetição com <b>[Refrão]</b>, <b>Refrão 2x</b> ou <b>(2x)</b> depois da estrofe: o app volta ao trecho certo sozinho.</p>
+      </div>
       <div class="form-actions">
         <div class="grow">
           <button class="btn" id="ed-tocar">
@@ -357,8 +388,10 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
     <div class="stage-tools">
       <div class="pill" title="Mudar o tom"><button id="p-tom-menos" aria-label="Meio tom abaixo">−</button><span class="k" id="p-tom">G</span><button id="p-tom-mais" aria-label="Meio tom acima">+</button></div>
       <div class="pill" title="Tamanho da letra"><button id="p-fonte-menos" aria-label="Diminuir letra">A−</button><button id="p-fonte-mais" aria-label="Aumentar letra">A+</button></div>
+      <button class="btn-rep" id="p-repetir" title="Toca a parte atual mais uma vez (tecla R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></svg><span id="p-repetir-txt">Repetir parte</span></button>
     </div>
   </div>
+  <nav class="mapa" id="p-mapa" aria-label="Partes da música"></nav>
   <div class="progress"><i id="p-prog"></i></div>
   <div class="stage-body" id="p-corpo"><div class="sheet-music" id="p-cifra"></div></div>
   <div class="countdown" id="p-contagem" hidden></div>
@@ -377,7 +410,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
     </div>
     <div class="speed">velocidade<b id="p-vel">100%</b></div>
   </div>
-  <div class="keys">Teclado ou pedal: <kbd>Espaço</kbd> tocar/pausar · <kbd>↓</kbd><kbd>PgDn</kbd> avançar · <kbd>↑</kbd><kbd>PgUp</kbd> voltar · <kbd>→</kbd> próxima · <kbd>←</kbd> anterior</div>
+  <div class="keys">Teclado ou pedal: <kbd>Espaço</kbd> tocar/pausar · <kbd>↓</kbd><kbd>PgDn</kbd> avançar · <kbd>↑</kbd><kbd>PgUp</kbd> voltar · <kbd>→</kbd> próxima · <kbd>←</kbd> anterior · <kbd>R</kbd> repetir parte</div>
 </div>
 
 <div class="toast" id="toast" hidden></div>
@@ -409,18 +442,16 @@ C                       G
 Por isso, dona Rosa, entre dentro desta roda
 G                          C
 Diga um verso bem bonito, diga adeus e vá-se embora` },
-  { titulo:"Peixe Vivo", artista:"Folclore brasileiro", tom:"G", duracao:90, intro:6, texto:
+  { titulo:"Peixe Vivo", artista:"Folclore brasileiro", tom:"G", duracao:110, intro:6, texto:
 `[Intro]
 G   D   G
 
+[Primeira Parte]
 G                  D
 Como pode o peixe vivo
                      G
 Viver fora da água fria
-                  D
-Como pode o peixe vivo
-                     G
-Viver fora da água fria
+(2x)
 
 [Refrão]
        C          G
@@ -430,7 +461,11 @@ Como poderei viver
          C              G
 Sem a tua, sem a tua
       D             G
-Sem a tua companhia` },
+Sem a tua companhia
+
+[Primeira Parte]
+
+Refrão 2x` },
   { titulo:"O Cravo e a Rosa", artista:"Folclore brasileiro", tom:"D", duracao:70, intro:4, texto:
 `D                         A7
 O cravo brigou com a rosa
@@ -516,6 +551,118 @@ function chordProParaTexto(texto){
     letra += linha.slice(last);
     return letra.trim() ? acordes + "\n" + letra : acordes;
   }).join("\n");
+}
+
+/* ---------- Estrutura da música: partes, repetições e roteiro ---------- */
+const PARTE_NOMES = "intro(?:du[cç][aã]o)?|refr[aã]o(?:\\s*\\d+)?|pr[eé][- ]?refr[aã]o|ponte|solo|final|primeira parte|segunda parte|terceira parte|parte \\d+|verso(?:\\s*\\d+)?|estrofe(?:\\s*\\d+)?|interl[uú]dio|passagem|riff|outro|coro";
+const REP_TXT = "\\(?\\s*(?:(\\d+)\\s*x|x\\s*(\\d+)|(bis))\\s*\\)?";
+const CAB_SOLTO_RE = new RegExp("^\\(?\\s*(?:repete\\s+(?:o\\s+|a\\s+)?)?(" + PARTE_NOMES + ")\\s*\\)?\\s*:?\\s*(?:" + REP_TXT + ")?\\s*\\)?$", "i");
+const SO_REP_RE = new RegExp("^" + REP_TXT + "$", "i");
+const REP_FIM_RE = new RegExp("\\s*" + REP_TXT + "\\s*$", "i");
+const INFO_RE = /^(capotraste|capo|afina[cç][aã]o)\b/i;
+
+function chaveParte(nome){ return nome.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, " ").trim(); }
+function repsDe(m){ if (!m) return 1; if (m[3]) return 2; return Math.max(1, Math.min(9, parseInt(m[1] || m[2], 10) || 1)); }
+function nomeBonito(s){ s = s.trim(); return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// Reconhece linhas que abrem uma parte: "[Refrão]", "[Refrão 2x]", "[Intro] G D", "(Refrão)", "Repete o refrão 2x".
+function lerCabecalho(linha){
+  const t = linha.trim(); if (!t) return null;
+  let m = /^\[([^\]]+)\]\s*(.*)$/.exec(t);
+  if (m && !ehAcorde(m[1].trim())){
+    if (INFO_RE.test(m[1].trim())) return { info: true };
+    let nome = m[1].trim(), resto = m[2].trim(), reps = 1;
+    const r1 = REP_FIM_RE.exec(nome); if (r1){ reps = repsDe(r1); nome = nome.slice(0, r1.index).trim(); }
+    const r2 = SO_REP_RE.exec(resto); if (r2){ reps = repsDe(r2); resto = ""; }
+    if (resto && !ehLinhaAcordes(resto)) return null;
+    return { nome: nomeBonito(nome) || "Parte", reps, resto };
+  }
+  m = CAB_SOLTO_RE.exec(t);
+  if (m) return { nome: nomeBonito(m[1]), reps: repsDe([null, m[2], m[3], m[4]]), resto: "" };
+  return null;
+}
+
+function aparar(linhas){
+  let a = 0, b = linhas.length;
+  while (a < b && !linhas[a].trim()) a++;
+  while (b > a && !linhas[b - 1].trim()) b--;
+  return linhas.slice(a, b);
+}
+
+// Estrofe seguida de "(2x)": repete a estrofe no lugar certo.
+function expandirEstrofes(linhas){
+  const out = []; let ini = 0;
+  for (const l of linhas){
+    const t = l.trim();
+    const m = t ? SO_REP_RE.exec(t) : null;
+    if (m){
+      const estrofe = out.slice(ini).filter((x) => typeof x === "string");
+      const n = repsDe(m);
+      for (let k = 2; k <= n; k++){ out.push({ marca: k }); out.push(...estrofe); }
+      ini = out.length; continue;
+    }
+    out.push(l);
+    if (!t) ini = out.length;
+  }
+  return out;
+}
+
+function analisarMusica(texto){
+  const linhas = String(texto || "").split("\n");
+  const blocos = []; let atual = { cab: null, linhas: [] };
+  for (const l of linhas){
+    const c = lerCabecalho(l);
+    if (c && !c.info){ blocos.push(atual); atual = { cab: c, linhas: c.resto ? [c.resto] : [] }; }
+    else atual.linhas.push(l);
+  }
+  blocos.push(atual);
+  const defs = new Map(), ordem = [], ultima = {}, preambulo = [];
+  for (const b of blocos){
+    const corpo = aparar(b.linhas);
+    const temConteudo = corpo.some((l) => l.trim() && !SO_REP_RE.test(l.trim()));
+    if (!b.cab){
+      if (!corpo.length) continue;
+      const soInfo = corpo.every((l) => !l.trim() || (lerCabecalho(l) || {}).info);
+      if (soInfo){ preambulo.push(...corpo); continue; }
+      // info no topo vai para o preâmbulo; o resto vira "Início"
+      let k = 0; while (k < corpo.length && (!corpo[k].trim() || (lerCabecalho(corpo[k]) || {}).info)) k++;
+      preambulo.push(...aparar(corpo.slice(0, k)));
+      defs.set("inicio", { nome: "Início", linhas: aparar(corpo.slice(k)) });
+      ordem.push({ key: "inicio", reps: 1 }); continue;
+    }
+    const base = chaveParte(b.cab.nome);
+    if (temConteudo){
+      let key = base;
+      if (defs.has(key) && defs.get(key).linhas.join("\n") !== corpo.join("\n")){
+        let n = 2; while (defs.has(base + "#" + n)) n++; key = base + "#" + n;
+      }
+      defs.set(key, { nome: b.cab.nome, linhas: corpo });
+      ultima[base] = key;
+      ordem.push({ key, reps: b.cab.reps });
+    } else if (ultima[base]){
+      ordem.push({ key: ultima[base], reps: b.cab.reps });       // "Refrão" sozinho = volta ao refrão
+    } else {
+      if (!defs.has(base)) defs.set(base, { nome: b.cab.nome, linhas: [] });
+      ultima[base] = base;
+      ordem.push({ key: base, reps: b.cab.reps });
+    }
+  }
+  const auto = [];
+  for (const o of ordem) for (let r = 0; r < o.reps; r++) auto.push(o.key);
+  return { defs, auto, preambulo };
+}
+
+function roteiroValido(est, roteiro){
+  return Array.isArray(roteiro) && roteiro.length && roteiro.every((k) => est.defs.has(k)) ? roteiro : null;
+}
+
+// Sequência que o palco vai mostrar, na ordem em que a música é tocada.
+function montarSequencia(m, extras){
+  const est = analisarMusica(m.texto);
+  const ordem = roteiroValido(est, m.roteiro) || est.auto;
+  const seq = ordem.map((key) => ({ key }));
+  if (!seq.length) seq.push({ key: null });
+  return { est, seq };
 }
 
 /* ---------- Colar inteligente: limpa e organiza uma cifra copiada da internet ---------- */
@@ -800,7 +947,39 @@ async function carregarExemplos(){
 }
 
 /* ---------- Editor ---------- */
-let editando = null, excluirArmado = false;
+let editando = null, excluirArmado = false, edRoteiro = null, roteiroT = null;
+function renderRoteiroEditor(){
+  const est = analisarMusica($("f-texto").value);
+  if (edRoteiro) edRoteiro = edRoteiro.filter((k) => est.defs.has(k));
+  if (edRoteiro && !edRoteiro.length) edRoteiro = null;
+  const ordem = edRoteiro || est.auto;
+  const box = $("roteiro");
+  box.hidden = est.defs.size < 2 && ordem.length < 2;
+  const chips = $("roteiro-chips"); chips.textContent = "";
+  ordem.forEach((k, i) => {
+    const c = document.createElement("span"); c.className = "rchip";
+    const n = document.createElement("span"); n.className = "n"; n.textContent = i + 1;
+    const t = document.createElement("span"); t.textContent = est.defs.get(k)?.nome || k;
+    const x = document.createElement("button"); x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "Tirar " + t.textContent + " do roteiro");
+    x.onclick = () => { edRoteiro = ordem.slice(); edRoteiro.splice(i, 1); renderRoteiroEditor(); };
+    c.append(n, t, x); chips.append(c);
+  });
+  const add = $("roteiro-add"); add.textContent = "";
+  const rot = document.createElement("span"); rot.className = "hint"; rot.textContent = "Adicionar no fim:"; add.append(rot);
+  for (const [k, d] of est.defs){
+    const b = document.createElement("button"); b.type = "button"; b.className = "radd"; b.textContent = "+ " + d.nome;
+    b.onclick = () => { edRoteiro = ordem.slice(); edRoteiro.push(k); renderRoteiroEditor(); };
+    add.append(b);
+  }
+  const modo = $("roteiro-modo"); modo.textContent = "";
+  if (edRoteiro){
+    modo.append("Personalizado · ");
+    const r = document.createElement("button"); r.type = "button"; r.className = "linkbtn"; r.textContent = "voltar ao automático";
+    r.onclick = () => { edRoteiro = null; renderRoteiroEditor(); };
+    modo.append(r);
+  } else modo.textContent = "Lido da cifra automaticamente";
+}
+$("f-texto").addEventListener("input", () => { clearTimeout(roteiroT); roteiroT = setTimeout(renderRoteiroEditor, 350); });
 function abrirEditor(id, pre){
   const m = id ? estado.musicas.get(id) : null;
   editando = m ? m.id : null;
@@ -812,6 +991,8 @@ function abrirEditor(id, pre){
   $("f-duracao").value = d.duracao ? fmtTempo(d.duracao) : "";
   $("f-intro").value = d.intro ? String(d.intro) : "";
   $("f-texto").value = d.texto || "";
+  edRoteiro = Array.isArray(d.roteiro) ? d.roteiro.slice() : null;
+  renderRoteiroEditor();
   $("ed-excluir").hidden = !m; excluirArmado = false; $("ed-excluir").textContent = "Excluir música";
   const av = $("ed-aviso");
   if (pre && pre.aviso){ av.textContent = pre.aviso; av.hidden = false; } else av.hidden = true;
@@ -828,7 +1009,7 @@ function lerFormulario(){
     tom: $("f-tom").value.trim(),
     duracao: lerTempo($("f-duracao").value),
     intro: Math.max(0, parseInt($("f-intro").value, 10) || 0),
-    texto, atualizada: Date.now() };
+    texto, roteiro: roteiroValido(analisarMusica(texto), edRoteiro), atualizada: Date.now() };
 }
 function fecharEditor(){ pararCrono(); $("editor").hidden = true; editando = null; }
 $("ed-fechar").onclick = fecharEditor;
@@ -1030,25 +1211,91 @@ $("foto-ler").onclick = async () => {
 $("foto-parar").onclick = () => ctlFoto?.abort();
 
 /* ---------- Modo palco ---------- */
-const P = { fila: [], i: 0, m: null, tocando: false, pos: 0, ultimo: 0, decorrido: 0, intro: 0, vel: 1, transp: 0, fonte: 0, alterado: false, voltarEditor: false, wake: null, raf: 0 };
+const P = { fila: [], i: 0, m: null, tocando: false, pos: 0, ultimo: 0, decorrido: 0, intro: 0, vel: 1, transp: 0, fonte: 0, alterado: false, voltarEditor: false, wake: null, raf: 0, est: null, seq: [], atual: -1, durExtra: 0 };
 const corpo = $("p-corpo");
 
+function linhaPalco(raw, bemol){
+  const d = document.createElement("div"); d.className = "l";
+  if (typeof raw === "object"){ d.className = "rep"; d.textContent = "↻ de novo · " + raw.marca + "ª vez"; return d; }
+  const tr = raw.trim();
+  if (/^\[[^\]]+\]$/.test(tr) && !ehAcorde(tr.slice(1,-1))){ const s = document.createElement("span"); s.className = "s"; s.textContent = tr.slice(1,-1); d.append(s); }
+  else if (ehLinhaAcordes(raw)){ d.classList.add("c"); d.textContent = transporLinha(raw, P.transp, bemol); }
+  else if (/^\s*[eBGDAE]\s*[|:]/.test(raw)){ d.classList.add("t"); d.textContent = raw; }
+  else d.textContent = raw;
+  return d;
+}
 function renderCifra(){
   const m = P.m, el = $("p-cifra"); el.textContent = "";
   const bemol = usarBemol(m.tom, P.transp, m.texto || "");
-  const linhas = (m.texto || "").split("\n");
-  for (const raw of linhas){
-    const d = document.createElement("div"); d.className = "l";
-    const tr = raw.trim();
-    if (/^\[[^\]]+\]$/.test(tr) && !ehAcorde(tr.slice(1,-1))){ const s = document.createElement("span"); s.className = "s"; s.textContent = tr.slice(1,-1); d.append(s); }
-    else if (ehLinhaAcordes(raw)){ d.classList.add("c"); d.textContent = transporLinha(raw, P.transp, bemol); }
-    else if (/^\s*[eBGDAE]\s*[|:]/.test(raw)){ d.classList.add("t"); d.textContent = raw; }
-    else d.textContent = raw;
-    el.append(d);
-  }
+  for (const l of P.est.preambulo) el.append(linhaPalco(l, bemol));
+  const vezes = {};
+  P.seq.forEach((item, i) => {
+    const bloco = document.createElement("section"); bloco.className = "bloco" + (item.extra ? " extra" : ""); bloco.dataset.i = i;
+    const def = item.key ? P.est.defs.get(item.key) : { nome: "", linhas: (m.texto || "").split("\n") };
+    if (item.key){
+      vezes[item.key] = (vezes[item.key] || 0) + 1;
+      const cab = document.createElement("div"); cab.className = "l";
+      const s = document.createElement("span"); s.className = "s"; s.textContent = def.nome;
+      if (vezes[item.key] > 1){ const sm = document.createElement("small"); sm.textContent = vezes[item.key] + "ª vez"; s.append(sm); }
+      cab.append(s); bloco.append(cab);
+    }
+    for (const l of expandirEstrofes(def.linhas)) bloco.append(linhaPalco(l, bemol));
+    if (i < P.seq.length - 1) bloco.append(Object.assign(document.createElement("div"), { className: "l" }));
+    el.append(bloco);
+  });
   const fim = document.createElement("div"); fim.className = "end"; fim.textContent = "fim"; el.append(fim);
   $("p-tom").textContent = transporTom(m.tom, P.transp) || (P.transp ? (P.transp > 0 ? "+" : "") + P.transp : "tom");
+  renderMapa();
   aplicarFonte();
+}
+function renderMapa(){
+  const mapa = $("p-mapa"); mapa.textContent = "";
+  const comPartes = P.seq.length > 1 && P.seq[0].key;
+  mapa.hidden = !comPartes; $("p-repetir").hidden = !comPartes;
+  if (!comPartes) return;
+  P.seq.forEach((item, i) => {
+    const c = document.createElement("button"); c.className = "chip"; c.dataset.i = i;
+    c.textContent = P.est.defs.get(item.key)?.nome || "Parte";
+    c.onclick = () => irParaParte(i);
+    mapa.append(c);
+  });
+  P.atual = -1; marcarParteAtual();
+}
+function blocoTopo(i){ const b = $("p-cifra").querySelector(`.bloco[data-i="${i}"]`); return b ? b.offsetTop - $("p-cifra").offsetTop : 0; }
+function parteAtual(){
+  const linha = corpo.scrollTop + corpo.clientHeight * 0.25;
+  let atual = 0;
+  for (const b of $("p-cifra").querySelectorAll(".bloco")){ if (b.offsetTop - $("p-cifra").offsetTop <= linha) atual = +b.dataset.i; else break; }
+  return atual;
+}
+function marcarParteAtual(){
+  if ($("p-mapa").hidden) return;
+  const i = parteAtual(); if (i === P.atual) return;
+  P.atual = i;
+  const mapa = $("p-mapa");
+  mapa.querySelectorAll(".chip").forEach((c) => { const n = +c.dataset.i; c.classList.toggle("on", n === i); c.classList.toggle("feito", n < i); });
+  const c = mapa.querySelector(`.chip[data-i="${i}"]`);
+  if (c) mapa.scrollTo({ left: c.offsetLeft - mapa.clientWidth / 2 + c.offsetWidth / 2, behavior: "smooth" });
+  const nome = P.est.defs.get(P.seq[i]?.key)?.nome;
+  $("p-repetir-txt").textContent = nome ? "Repetir " + nome.toLowerCase() : "Repetir parte";
+}
+function irParaParte(i){
+  P.intro = 0; $("p-contagem").hidden = true;
+  P.pos = Math.max(0, blocoTopo(i) - 6);
+  rolarPara(P.pos);
+  $("p-proxima").hidden = true;
+}
+function linhasDaParte(key){ return expandirEstrofes(P.est.defs.get(key)?.linhas || []).length + 2; }
+function repetirParte(){
+  if ($("p-mapa").hidden) return;
+  const i = parteAtual(), item = P.seq[i]; if (!item?.key) return;
+  // Tempo extra proporcional ao tamanho da parte, para a velocidade não mudar.
+  const total = P.seq.reduce((n, it) => n + linhasDaParte(it.key), 0);
+  P.durExtra += ((P.m.duracao || 180) + P.durExtra) * linhasDaParte(item.key) / total;
+  P.seq.splice(i + 1, 0, { key: item.key, extra: true });
+  const top = corpo.scrollTop; renderCifra(); corpo.scrollTop = top; P.pos = top;
+  $("p-proxima").hidden = true;
+  toast(P.est.defs.get(item.key).nome + " vai tocar mais uma vez");
 }
 function fonteAuto(){
   const maior = Math.max(20, ...(P.m.texto || "").split("\n").map((l) => l.replace(/\s+$/,"").length));
@@ -1056,16 +1303,18 @@ function fonteAuto(){
   return Math.max(13, Math.min(34, Math.floor(larg / (maior * 0.64))));
 }
 function aplicarFonte(){ $("p-cifra").style.fontSize = (P.fonte || fonteAuto()) + "px"; }
+function durTotal(){ return (P.m.duracao || 180) + P.durExtra; }
 function velBase(){
   const max = corpo.scrollHeight - corpo.clientHeight;
-  const tempo = Math.max(10, (P.m.duracao || 180) - (P.m.intro || 0));
+  const tempo = Math.max(10, durTotal() - (P.m.intro || 0));
   return Math.max(0, max - corpo.clientHeight * 0.55) / tempo;  // chega ao "fim" no alto da tela
 }
 function atualizarRelogio(){
-  const dur = P.m.duracao || 0;
+  const dur = P.m.duracao ? durTotal() : 0;
+  const fim = corpo.scrollHeight - corpo.clientHeight * 1.55;
   $("p-tempo").textContent = fmtTempo(P.decorrido);
   $("p-total").textContent = dur ? fmtTempo(dur) : "—";
-  $("p-prog").style.width = dur ? Math.min(100, P.decorrido / dur * 100) + "%" : "0%";
+  $("p-prog").style.width = (fim > 0 ? Math.min(100, corpo.scrollTop / fim * 100) : (dur ? Math.min(100, P.decorrido / dur * 100) : 0)) + "%";
   $("p-vel").textContent = Math.round(P.vel * 100) + "%";
 }
 function loop(t){
@@ -1081,11 +1330,11 @@ function loop(t){
     const fim = Math.max(0, corpo.scrollHeight - corpo.clientHeight - corpo.clientHeight * 0.55);
     P.pos = Math.min(fim, P.pos + velBase() * P.vel * dt);
     corpo.scrollTop = P.pos;
-    const dur = P.m.duracao || 0;
-    const acabouTempo = dur ? P.decorrido >= dur / P.vel : false;
-    const acabouRolagem = !dur && fim > 0 && P.pos >= fim - 1;
-    if (acabouTempo || acabouRolagem) terminou();
+    // Com rolagem, termina ao chegar no fim (mesmo se o músico voltou ao refrão); sem rolagem, pelo tempo.
+    const acabou = fim > 0 ? (P.pos >= fim - 1 && P.decorrido > 2) : P.decorrido >= durTotal() / P.vel;
+    if (acabou) terminou();
   }
+  marcarParteAtual();
   atualizarRelogio();
 }
 function terminou(){
@@ -1110,7 +1359,8 @@ function carregarNoPalco(i){
   P.i = i; P.m = estado.musicas.get(P.fila[i]);
   if (!P.m) return;
   P.vel = P.m.velocidade || 1; P.transp = P.m.transp || 0; P.fonte = P.m.fonte || 0; P.alterado = false;
-  P.pos = 0; P.decorrido = 0; P.intro = P.m.intro || 0;
+  P.pos = 0; P.decorrido = 0; P.intro = P.m.intro || 0; P.durExtra = 0;
+  ({ est: P.est, seq: P.seq } = montarSequencia(P.m));
   $("p-titulo").textContent = P.m.titulo;
   const pos = P.fila.length > 1 ? `${i+1} de ${P.fila.length} · ` : "";
   $("p-sub").textContent = pos + (P.m.artista || "") + (P.m.duracao ? "" : " · sem duração: usando 3:00");
@@ -1143,13 +1393,20 @@ function sairPalco(){
   if (P.voltarEditor && editando) abrirEditor(editando);
 }
 function ajustarVel(d){ P.vel = Math.max(0.3, Math.min(3, Math.round((P.vel + d)*100)/100)); P.alterado = true; atualizarRelogio(); }
-function rolarTela(dir){ P.pos = Math.max(0, corpo.scrollTop + dir * corpo.clientHeight * 0.5); corpo.scrollTo({ top: P.pos, behavior: "smooth" }); }
+// Tocando: pulo imediato (a rolagem automática continua dali). Parado: pulo suave.
+function rolarPara(y){ if (P.tocando) corpo.scrollTop = y; else corpo.scrollTo({ top: y, behavior: "smooth" }); }
+function rolarTela(dir){ P.pos = Math.max(0, corpo.scrollTop + dir * corpo.clientHeight * 0.5); rolarPara(P.pos); }
 function alternar(){
-  if (!P.tocando && P.pos >= corpo.scrollHeight - corpo.clientHeight * 1.55 - 1){ P.pos = 0; corpo.scrollTop = 0; P.decorrido = 0; P.intro = P.m.intro || 0; }
+  if (!P.tocando && P.pos >= corpo.scrollHeight - corpo.clientHeight * 1.55 - 1){
+    P.pos = 0; corpo.scrollTop = 0; P.decorrido = 0; P.intro = P.m.intro || 0; P.durExtra = 0;
+    ({ est: P.est, seq: P.seq } = montarSequencia(P.m)); renderCifra();
+  }
   setTocando(!P.tocando);
 }
 
 $("p-play").onclick = alternar;
+$("p-repetir").onclick = repetirParte;
+corpo.addEventListener("scroll", () => { if (!P.tocando) marcarParteAtual(); }, { passive: true });
 $("p-sair").onclick = sairPalco;
 $("p-lento").onclick = () => ajustarVel(-0.1);
 $("p-rapido").onclick = () => ajustarVel(0.1);
@@ -1174,6 +1431,7 @@ document.addEventListener("keydown", (e) => {
   else if (k === "ArrowLeft" || k === "MediaTrackPrevious"){ e.preventDefault(); $("p-ant").click(); }
   else if (k === "+" || k === "="){ ajustarVel(0.1); }
   else if (k === "-"){ ajustarVel(-0.1); }
+  else if (k === "r" || k === "R"){ repetirParte(); }
   else if (k === "Escape"){ sairPalco(); }
 });
 

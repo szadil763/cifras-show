@@ -18,11 +18,14 @@ Depois de instalado, o app abre em tela cheia e funciona **sem internet** (as m�
   - Só funciona na versão publicada no claude.ai, que usa a IA da conta Claude do usuário. Abrindo o `index.html` direto, essa função fica desativada.
 - **Busca assistida**: digite o nome da música na busca. Se ela não está no repertório, o app oferece procurar a cifra no Cifra Club ou no Google. Ao voltar para o app, ele pergunta se você copiou a cifra e cola com um toque.
 - **Colar inteligente**: cole a página copiada inteira. O app tira propagandas, menus e rodapé, pega título, artista e tom, marca as partes ([Intro], [Refrão]…) e anota capotraste. Na versão do claude.ai há também o botão **Organizar com IA** para cifras que perderam o alinhamento.
+- **Roteiro da música (partes e repetições)**: o app entende as partes ([Intro], [Primeira Parte], [Refrão]…) e as indicações de repetição — uma parte escrita de novo só com o nome (`[Refrão]`, `Refrão`, `(Refrão 2x)`, `Repete o refrão`) volta ao trecho certo, e `(2x)` depois de uma estrofe repete a estrofe. O editor mostra o roteiro detectado e permite montar uma ordem personalizada.
 - **Modo palco**:
   - rolagem automática calculada pela duração da música, com espera de introdução e contagem regressiva;
   - velocidade + e − (fica salva por música);
   - mudar o tom (transposição de meio em meio tom, escolhendo sustenido ou bemol pelo tom);
   - tamanho da letra automático ou manual;
+  - mapa de partes no topo: mostra onde você está e pula para qualquer parte com um toque;
+  - botão **Repetir parte** (ou tecla `R`) para tocar o refrão mais uma vez quando o público pede — a velocidade não muda;
   - tela sempre ligada (Wake Lock) enquanto o palco está aberto;
   - pedal Bluetooth de virar página ou teclado: `Espaço` toca/pausa, `↓`/`PgDn` avança, `↑`/`PgUp` volta, `→` próxima música, `←` anterior.
 - **Setlist**: ordem do show, tempo total e passagem automática para a próxima música.
