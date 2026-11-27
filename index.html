@@ -72,6 +72,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .opcoes{display:flex;flex-wrap:wrap;gap:6px}
 .opcao{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:600;font-size:14px}
 .opcao[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+select{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:11px 12px;color:var(--fg);width:100%;min-width:0}
 input[type=email],input[type=password]{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:11px 12px;color:var(--fg);width:100%;min-width:0}
 .btn-instalar{min-height:36px;padding:6px 12px;font-size:14px}
 .install-ios{margin-top:14px;font-size:14px}
@@ -200,6 +201,20 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 .round svg{width:22px;height:22px}
 .speed{display:flex;flex-direction:column;align-items:center;font-size:11px;color:var(--muted);min-width:94px;text-align:right}
 .speed b{font-family:var(--font-mono);font-size:15px;color:var(--fg)}
+.pulso{position:absolute;z-index:5;top:calc(env(safe-area-inset-top,0px) + 12px);left:max(12px,env(safe-area-inset-left,0px));width:14px;height:14px;border-radius:50%;background:var(--accent);opacity:.18;pointer-events:none}
+.pulso.on{animation:pulso .18s ease-out}
+.pulso.um{background:var(--fg)}
+@keyframes pulso{0%{opacity:1;transform:scale(1.6)}100%{opacity:.18;transform:scale(1)}}
+.countdown.bate{animation:bate .25s ease-out}
+@keyframes bate{0%{transform:scale(1.25)}100%{transform:scale(1)}}
+.grav{position:absolute;z-index:7;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 10px);width:min(94vw,560px);display:flex;align-items:center;gap:10px;background:var(--surface);border:2px solid var(--live);border-radius:14px;padding:8px 10px}
+.grav .rec{width:12px;height:12px;border-radius:50%;background:var(--live);flex:none;animation:rec 1s infinite}
+@keyframes rec{50%{opacity:.25}}
+.grav-txt{flex:1;min-width:0}
+.grav-txt b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grav-txt small{display:block;color:var(--muted);font-size:12px}
+.grav .btn{min-height:38px;padding:6px 12px;font-size:14px}
+@media (prefers-reduced-motion:reduce){.pulso.on,.countdown.bate,.grav .rec{animation:none}.pulso.on{opacity:1}}
 .countdown{position:absolute;z-index:4;inset:0;display:grid;place-items:center;pointer-events:none;font-family:var(--font-display);font-weight:800;font-size:28vmin;color:color-mix(in srgb,var(--accent) 80%,transparent)}
 .next-card{position:absolute;z-index:5;left:50%;bottom:110px;transform:translateX(-50%);background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:14px 16px;display:flex;gap:12px;align-items:center;width:min(92vw,420px)}
 .next-card div{flex:1;min-width:0}
@@ -229,6 +244,8 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 .rchip button:hover{background:var(--surface-2);color:var(--fg)}
 .radd{border:1px dashed var(--line);background:none;border-radius:999px;padding:4px 10px;font-size:13px;color:var(--fg)}
 .radd:hover{border-color:var(--accent)}
+.tempos-info{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:13px}
+.tempos-info:empty{display:none}
 .linkbtn{background:none;border:0;color:var(--accent);font-weight:600;font-size:13px;padding:4px}
 .keys{font-size:12px;color:var(--muted);padding:6px 12px;text-align:center;border-top:1px solid var(--line);background:#0b0e13}
 .keys kbd{font-family:var(--font-mono);border:1px solid var(--line);border-radius:4px;padding:0 4px;font-size:11px}
@@ -329,6 +346,14 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
         </label>
         <label>Introdução (seg)<input type="text" id="f-intro" inputmode="numeric" placeholder="0"></label>
       </div>
+      <div class="row">
+        <label>BPM (andamento)
+          <span class="dur-field"><input type="text" id="f-bpm" inputmode="numeric" placeholder="Ex.: 96"><button class="btn" id="btn-bater" type="button" title="Toque no ritmo da música (4 vezes ou mais)">Bater</button></span>
+        </label>
+        <label>Compasso
+          <select id="f-compasso"><option value="4">4 tempos</option><option value="3">3 tempos (valsa)</option><option value="2">2 tempos</option><option value="6">6 tempos</option></select>
+        </label>
+      </div>
       <p class="hint" id="crono-hint" style="margin:-4px 0 0">A cifra rola do começo ao fim no tempo da duração. A introdução é o tempo que a tela espera parada antes de rolar.</p>
       <label>Cifra (acordes em cima da letra)
         <textarea id="f-texto" spellcheck="false" placeholder="[Intro]&#10;G  D  Em  C&#10;&#10;G                D&#10;Escreva a letra aqui com os acordes em cima"></textarea>
@@ -341,6 +366,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
         <p class="notice" id="roteiro-vazio" style="margin:0" hidden>Esta cifra ainda não tem partes marcadas, então o palco rola tudo direto. Marque as partes com uma linha entre colchetes, por exemplo <b>[Primeira Parte]</b> e <b>[Refrão]</b>. Onde o refrão se repete, escreva só <b>[Refrão]</b> ou <b>Refrão 2x</b>.</p>
         <div class="roteiro-chips" id="roteiro-chips"></div>
         <div class="roteiro-add" id="roteiro-add"></div>
+        <div class="tempos-info" id="tempos-info"></div>
         <p class="hint" style="margin:0">O palco segue esta ordem. Escreva cada parte uma vez só e indique a repetição com <b>[Refrão]</b>, <b>Refrão 2x</b> ou <b>(2x)</b> depois da estrofe: no palco, quando chega a hora, a tela salta até o refrão e depois volta para a estrofe seguinte.</p>
       </div>
       <div class="form-actions">
@@ -461,6 +487,8 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
       <div class="campo"><span>Rolagem no palco</span><div class="opcoes" id="pref-modo"></div>
         <p class="hint" style="margin:0">Saltar: cada parte aparece uma vez e a tela vai até o refrão quando ele volta. Corrido: as repetições aparecem escritas em sequência.</p></div>
       <div class="campo"><span>Tamanho da letra no palco</span><div class="opcoes" id="pref-letra"></div></div>
+      <div class="campo"><span>Som na contagem antes de rolar</span><div class="opcoes" id="pref-som"></div></div>
+      <div class="campo"><span>Pulso do metrônomo na tela (músicas com BPM)</span><div class="opcoes" id="pref-pulso"></div></div>
       <label>Espera antes de rolar, em músicas novas (segundos)<input type="text" id="pref-intro" inputmode="numeric" placeholder="0"></label>
     </section>
   </div>
@@ -481,11 +509,19 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
       <div class="pill" title="Tamanho da letra"><button id="p-fonte-menos" aria-label="Diminuir letra">A−</button><button id="p-fonte-mais" aria-label="Aumentar letra">A+</button></div>
       <button class="btn-rep" id="p-repetir" title="Toca a parte atual mais uma vez (tecla R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></svg><span id="p-repetir-txt">Repetir parte</span></button>
       <button class="btn-rep" id="p-modo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 20V4M3 8l4-4 4 4M17 4v16M13 16l4 4 4-4"/></svg><span id="p-modo-txt">Saltar</span></button>
+      <button class="btn-rep" id="p-ensinar" title="Toque a música uma vez marcando as mudanças de parte; a rolagem passa a seguir esse tempo"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="var(--live)"/></svg><span>Ensinar tempo</span></button>
       <button class="btn-rep" id="p-trava" title="Trava a tela contra toques sem querer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Travar</span></button>
     </div>
     <nav class="mapa" id="p-mapa" aria-label="Partes da música"></nav>
   </div>
   <div class="countdown" id="p-contagem" hidden></div>
+  <div class="pulso" id="p-pulso" hidden aria-hidden="true"></div>
+  <div class="grav" id="p-grav" hidden role="status">
+    <span class="rec" aria-hidden="true"></span>
+    <div class="grav-txt"><b id="p-grav-parte"></b><small id="p-grav-dica"></small></div>
+    <button class="btn primary" id="p-grav-ok">Concluir</button>
+    <button class="btn ghost" id="p-grav-x">Cancelar</button>
+  </div>
   <div class="salto" id="p-salto" hidden role="status"></div>
   <div class="next-card" id="p-proxima" hidden>
     <div><small>Próxima do setlist</small><b id="p-proxima-nome"></b></div>
@@ -1054,7 +1090,7 @@ async function carregarExemplos(){
 }
 
 /* ---------- Editor ---------- */
-let editando = null, excluirArmado = false, edRoteiro = null, roteiroT = null;
+let editando = null, excluirArmado = false, edRoteiro = null, roteiroT = null, edTempos = null;
 function renderRoteiroEditor(){
   const est = analisarMusica($("f-texto").value);
   if (edRoteiro) edRoteiro = edRoteiro.filter((k) => est.defs.has(k));
@@ -1079,6 +1115,21 @@ function renderRoteiroEditor(){
     b.onclick = () => { edRoteiro = ordem.slice(); edRoteiro.push(k); renderRoteiroEditor(); };
     add.append(b);
   }
+  const info = $("tempos-info"); info.textContent = "";
+  if (edTempos){
+    const vale = edTempos.roteiro.length === ordem.length && edTempos.roteiro.every((k, i) => k === ordem[i]);
+    const t = document.createElement("span");
+    t.textContent = vale ? "Tempo ensinado: a rolagem segue o seu andamento (" + fmtTempo(edTempos.dur.reduce((a, b) => a + b, 0)) + ")."
+      : "O tempo ensinado não vale mais porque o roteiro mudou. Ensine de novo no palco.";
+    t.style.color = vale ? "var(--ok)" : "var(--live)";
+    const x = document.createElement("button"); x.type = "button"; x.className = "linkbtn"; x.textContent = "apagar tempo ensinado";
+    x.onclick = () => { edTempos = null; renderRoteiroEditor(); };
+    info.append(t, x);
+  } else if (!semPartes){
+    const t = document.createElement("span"); t.className = "hint";
+    t.textContent = "Dica: no palco, use “Ensinar tempo” para a rolagem seguir o seu andamento em cada parte.";
+    info.append(t);
+  }
   const modo = $("roteiro-modo"); modo.textContent = "";
   if (edRoteiro){
     modo.append("Personalizado · ");
@@ -1100,6 +1151,10 @@ function abrirEditor(id, pre){
   $("f-intro").value = d.intro ? String(d.intro) : (!m && !pre && prefs.intro ? String(prefs.intro) : "");
   $("f-texto").value = d.texto || "";
   edRoteiro = Array.isArray(d.roteiro) ? d.roteiro.slice() : null;
+  edTempos = d.tempos && Array.isArray(d.tempos.dur) ? d.tempos : null;
+  $("f-bpm").value = d.bpm ? String(d.bpm) : "";
+  $("f-compasso").value = String(d.compasso || 4);
+  batidas = [];
   renderRoteiroEditor();
   $("ed-excluir").hidden = !m; excluirArmado = false; $("ed-excluir").textContent = "Excluir música";
   const av = $("ed-aviso");
@@ -1117,7 +1172,10 @@ function lerFormulario(){
     tom: $("f-tom").value.trim(),
     duracao: lerTempo($("f-duracao").value),
     intro: Math.max(0, parseInt($("f-intro").value, 10) || 0),
-    texto, roteiro: roteiroValido(analisarMusica(texto), edRoteiro), atualizada: Date.now() };
+    texto, roteiro: roteiroValido(analisarMusica(texto), edRoteiro), atualizada: Date.now(),
+    bpm: Math.max(0, Math.min(300, parseInt($("f-bpm").value, 10) || 0)) || null,
+    compasso: +$("f-compasso").value || 4,
+    tempos: edTempos };
 }
 function fecharEditor(){ pararCrono(); $("editor").hidden = true; editando = null; }
 $("ed-fechar").onclick = fecharEditor;
@@ -1138,6 +1196,21 @@ $("ed-excluir").onclick = () => {
   store.excluirMusica(editando); fecharEditor(); toast("Música excluída");
 };
 $("btn-nova").onclick = () => abrirColar(false);
+
+// Bater no ritmo: o BPM é a média dos intervalos entre os toques.
+let batidas = [];
+$("btn-bater").onclick = () => {
+  const agora = performance.now();
+  if (batidas.length && agora - batidas[batidas.length - 1] > 2000) batidas = [];
+  batidas.push(agora); batidas = batidas.slice(-8);
+  if (batidas.length >= 4){
+    const intervalos = batidas.slice(1).map((t, i) => t - batidas[i]);
+    const media = intervalos.reduce((a, b) => a + b, 0) / intervalos.length;
+    $("f-bpm").value = String(Math.round(60000 / media));
+    $("btn-bater").textContent = "Bater (" + batidas.length + ")";
+  } else $("btn-bater").textContent = "Bater (" + batidas.length + "/4)";
+  clearTimeout($("btn-bater")._t); $("btn-bater")._t = setTimeout(() => { $("btn-bater").textContent = "Bater"; }, 2500);
+};
 
 /* ---------- Colar cifra ---------- */
 let ctlColar = null;
@@ -1429,29 +1502,45 @@ function yDe(el){ return el.getBoundingClientRect().top - corpo.getBoundingClien
 function blocoDaChave(key){ return $("p-cifra").querySelector(`.bloco[data-key="${CSS.escape(key)}"]`); }
 function linhasDaParte(key){ return expandirEstrofes(P.est.defs.get(key)?.linhas || []).length + 2; }
 
-// Monta a linha do tempo do modo salto: quanto tempo cada passo do roteiro dura e de onde até onde a tela rola.
+// Tempo ensinado: duração gravada de cada parte, se ainda vale para o roteiro atual.
+function temposValidos(){
+  const tp = P.m?.tempos;
+  if (!temPartes() || !tp || !Array.isArray(tp.dur) || !Array.isArray(tp.roteiro)) return null;
+  const base = P.seq.filter((x) => !x.extra).map((x) => x.key);
+  if (base.length !== tp.roteiro.length || base.some((k, i) => k !== tp.roteiro[i])) return null;
+  const porChave = {};
+  tp.roteiro.forEach((k, i) => { (porChave[k] = porChave[k] || []).push(+tp.dur[i] || 0); });
+  let j = 0;
+  return P.seq.map((x) => x.extra ? porChave[x.key].reduce((a, b) => a + b, 0) / porChave[x.key].length : (+tp.dur[j++] || 1));
+}
+function usaPassos(){ return temPartes() && (P.modo === "salto" || !!temposValidos()); }
+function blocoDoPasso(i, key){ return P.modo === "salto" ? blocoDaChave(key) : $("p-cifra").querySelector(`.bloco[data-i="${i}"]`); }
+function totalMusica(){ const t = temposValidos(); return t ? t.reduce((a, b) => a + b, 0) : durTotal(); }
+
+// Monta a linha do tempo: quanto tempo cada passo do roteiro dura e de onde até onde a tela rola.
 function calcularPassos(){
-  if (P.modo !== "salto" || !temPartes()) { P.passos = []; return; }
+  if (!usaPassos()) { P.passos = []; return; }
   const H = corpo.clientHeight;
   const pesos = P.seq.map((it) => linhasDaParte(it.key));
   const soma = pesos.reduce((a, b) => a + b, 0) || 1;
   const tempo = Math.max(10, durTotal() - (P.m.intro || 0));
+  const ensinado = P.gravando ? null : temposValidos();
   P.passos = P.seq.map((it, i) => {
-    const b = blocoDaChave(it.key);
+    const b = blocoDoPasso(i, it.key);
     const topo = b ? yDe(b) : 0, alt = b ? b.offsetHeight : 0;
     const start = Math.max(0, topo - H * 0.06);
-    return { key: it.key, dur: tempo * pesos[i] / soma, start, fimBloco: Math.max(start, topo + alt - H * 0.7), proximoColado: false, end: 0 };
+    return { key: it.key, dur: ensinado ? ensinado[i] : tempo * pesos[i] / soma, start, fimBloco: Math.max(start, topo + alt - H * 0.7), proximoColado: false, end: 0 };
   });
   P.passos.forEach((p, i) => {
     const nx = P.passos[i + 1];
-    const b = blocoDaChave(p.key);
+    const b = blocoDoPasso(i, p.key), bn = nx ? blocoDoPasso(i + 1, nx.key) : null;
     // Se a próxima parte vem logo abaixo na folha, rola direto até ela; senão, salta.
-    p.proximoColado = !!(nx && b && b.nextElementSibling && b.nextElementSibling.dataset && b.nextElementSibling.dataset.key === nx.key);
+    p.proximoColado = !!(b && bn && b.nextElementSibling === bn);
     p.end = p.proximoColado ? nx.start : p.fimBloco;
   });
 }
 function parteAtual(){
-  if (P.modo === "salto") return Math.min(P.passo, P.seq.length - 1);
+  if (usaPassos()) return Math.min(P.passo, P.seq.length - 1);
   const linha = corpo.scrollTop + corpo.clientHeight * 0.25;
   let atual = 0;
   for (const b of $("p-cifra").querySelectorAll(".bloco")){ if (yDe(b) <= linha) atual = +b.dataset.i; else break; }
@@ -1470,8 +1559,9 @@ function marcarParteAtual(){
   if (P.modo === "salto") $("p-cifra").querySelectorAll(".bloco").forEach((b) => b.classList.toggle("agora", b.dataset.key === key));
 }
 function irParaParte(i){
-  P.intro = 0; $("p-contagem").hidden = true; $("p-proxima").hidden = true; P.acabou = false;
-  if (P.modo === "salto"){
+  if (P.gravando) return;
+  P.intro = 0; P.contagem = null; $("p-contagem").hidden = true; $("p-proxima").hidden = true; P.acabou = false;
+  if (usaPassos()){
     P.passo = i; P.tPasso = 0;
     const alvo = P.passos[i]?.start ?? 0;
     if (P.tocando) P.anim = { from: corpo.scrollTop, t: 0 };
@@ -1490,19 +1580,21 @@ function repetirParte(){
   const total = P.seq.reduce((n, it) => n + linhasDaParte(it.key), 0);
   P.durExtra += ((P.m.duracao || 180) + P.durExtra) * linhasDaParte(item.key) / total;
   P.seq.splice(i + 1, 0, { key: item.key, extra: true });
+  if (P.gravando) return;
   if (P.modo === "salto"){ renderMapa(); calcularPassos(); }
-  else { const top = corpo.scrollTop; renderCifra(); corpo.scrollTop = top; P.pos = top; }
+  else { const top = corpo.scrollTop; renderCifra(); corpo.scrollTop = top; P.pos = top; P.setY = top; calcularPassos(); }
   $("p-proxima").hidden = true; P.acabou = false;
   toast(P.est.defs.get(item.key).nome + " vai tocar mais uma vez");
 }
 // O músico rolou com o dedo: descobre em que parte do roteiro ele está.
 function ressincronizar(){
   const y = corpo.scrollTop, linha = y + corpo.clientHeight * 0.25;
-  let key = null;
-  for (const b of $("p-cifra").querySelectorAll(".bloco")){ if (yDe(b) <= linha) key = b.dataset.key; else break; }
+  let key = null, idx = 0;
+  for (const b of $("p-cifra").querySelectorAll(".bloco")){ if (yDe(b) <= linha){ key = b.dataset.key; idx = +b.dataset.i || 0; } else break; }
   if (!key) key = P.seq[0]?.key;
   let melhor = -1, dist = 1e9;
-  P.passos.forEach((p, i) => { if (p.key !== key) return; const d = i >= P.passo ? i - P.passo : (P.passo - i) + 0.5; if (d < dist){ dist = d; melhor = i; } });
+  if (P.modo !== "salto") melhor = Math.min(idx, P.passos.length - 1);
+  else P.passos.forEach((p, i) => { if (p.key !== key) return; const d = i >= P.passo ? i - P.passo : (P.passo - i) + 0.5; if (d < dist){ dist = d; melhor = i; } });
   if (melhor < 0) return;
   const p = P.passos[melhor];
   P.passo = melhor;
@@ -1518,7 +1610,7 @@ function fonteAuto(){
 }
 function aplicarFonte(){
   $("p-cifra").style.fontSize = (P.fonte || Math.round(fonteAuto() * escalaLetra())) + "px";
-  if (P.modo === "salto"){ const k = P.passos[P.passo]; calcularPassos(); if (k && P.passos[P.passo]) { /* mantém o passo atual */ } }
+  calcularPassos();
 }
 function durTotal(){ return (P.m.duracao || 180) + P.durExtra; }
 function velBase(){
@@ -1527,9 +1619,9 @@ function velBase(){
   return Math.max(0, max - corpo.clientHeight * 0.55) / tempo;  // chega ao "fim" no alto da tela
 }
 function atualizarRelogio(){
-  const dur = P.m.duracao ? durTotal() : 0;
+  const dur = temposValidos() ? totalMusica() : (P.m.duracao ? durTotal() : 0);
   let prog = 0;
-  if (P.modo === "salto" && P.passos.length){
+  if (usaPassos() && P.passos.length){
     const total = P.passos.reduce((a, p) => a + p.dur, 0) || 1;
     const feito = P.passos.slice(0, P.passo).reduce((a, p) => a + p.dur, 0) + Math.min(P.tPasso, P.passos[P.passo]?.dur || 0);
     prog = feito / total * 100;
@@ -1548,7 +1640,7 @@ function atualizarRelogio(){
 function avisoSalto(){
   const aviso = $("p-salto");
   const p = P.passos[P.passo], nx = P.passos[P.passo + 1];
-  if (!P.tocando || P.intro > 0 || !p || !nx || p.proximoColado){ aviso.hidden = true; return; }
+  if (!P.tocando || P.intro > 0 || P.contagem || P.gravando || !p || !nx || p.proximoColado){ aviso.hidden = true; return; }
   const falta = (p.dur - P.tPasso) / P.vel;
   if (falta <= 4){
     const nome = P.est.defs.get(nx.key)?.nome || "próxima parte";
@@ -1562,7 +1654,8 @@ function passoSalto(dt){
   if (!P.anim && Math.abs(corpo.scrollTop - P.setY) > 4) ressincronizar();   // o músico mexeu na tela
   let p = P.passos[P.passo]; if (!p) return;
   P.tPasso += dt * P.vel;
-  while (P.tPasso >= p.dur){
+  if (P.gravando){ P.tPasso = Math.min(P.tPasso, p.dur); }   // gravando: só muda de parte quando o músico mandar
+  while (!P.gravando && P.tPasso >= p.dur){
     if (P.passo >= P.passos.length - 1){ P.tPasso = p.dur; terminou(); break; }
     P.tPasso -= p.dur;
     const anterior = p; P.passo++; p = P.passos[P.passo];
@@ -1584,13 +1677,16 @@ function passoCorrido(dt){
   corpo.scrollTop = P.pos;
   // Com rolagem, termina ao chegar no fim; sem rolagem (música curta), pelo tempo.
   const acabou = fim > 0 ? (P.pos >= fim - 1 && P.decorrido > 2) : P.decorrido >= durTotal() / P.vel;
-  if (acabou) terminou();
+  if (acabou && !P.gravando) terminou();
 }
 function loop(t){
   P.raf = requestAnimationFrame(loop);
-  if (!P.tocando){ P.ultimo = t; $("p-salto").hidden = true; return; }
+  if (!P.tocando){ P.ultimo = t; $("p-salto").hidden = true; $("p-pulso").hidden = true; return; }
   const dt = Math.min(0.5, (t - (P.ultimo || t)) / 1000); P.ultimo = t;
+  if (P.contagem){ passoContagem(dt); return; }
   P.decorrido += dt;
+  pulsar();
+  if (P.gravando) atualizarGravacao();
   if (P.intro > 0){
     P.intro -= dt; const c = $("p-contagem");
     if (P.intro > 0){ c.hidden = false; c.textContent = Math.ceil(P.intro); } else c.hidden = true;
@@ -1599,7 +1695,7 @@ function loop(t){
       const alvo = P.modo === "salto" && temPartes() && P.passos[0] ? P.passos[0].start : Math.max(0, $("p-ui-top").offsetHeight - 12);
       if (corpo.scrollTop < alvo - 1){ corpo.scrollTop += Math.max(1, (alvo - corpo.scrollTop) * Math.min(1, dt * 5)); P.setY = corpo.scrollTop; P.pos = corpo.scrollTop; }
     }
-  } else if (P.modo === "salto" && temPartes()) passoSalto(dt);
+  } else if (usaPassos()) passoSalto(dt);
   else passoCorrido(dt);
   avisoSalto();
   marcarParteAtual();
@@ -1615,7 +1711,7 @@ function setTocando(v){
   P.tocando = v;
   $("p-play").innerHTML = v ? ICON_PAUSE : ICON_PLAY;
   $("p-play").setAttribute("aria-label", v ? "Pausar" : "Tocar");
-  if (v){ $("p-proxima").hidden = true; pedirTelaLigada(); P.setY = corpo.scrollTop; if (P.modo === "salto" && temPartes() && !P.passos.length) calcularPassos(); mostrarUI(900); }
+  if (v){ $("p-proxima").hidden = true; pedirTelaLigada(); P.setY = corpo.scrollTop; if (usaPassos() && !P.passos.length) calcularPassos(); mostrarUI(900); }
   else { $("p-contagem").hidden = true; $("p-salto").hidden = true; if (!P.travado) mostrarUI(); }
 }
 async function pedirTelaLigada(){
@@ -1624,9 +1720,10 @@ async function pedirTelaLigada(){
 document.addEventListener("visibilitychange", () => { if (!$("palco").hidden && document.visibilityState === "visible") pedirTelaLigada(); });
 
 function reiniciarMusica(){
-  P.pos = 0; P.decorrido = 0; P.intro = P.m.intro || 0; P.durExtra = 0;
+  P.pos = 0; P.decorrido = 0; P.durExtra = 0; P.contagem = null; P.ultimaBatida = -1;
   P.passo = 0; P.tPasso = 0; P.anim = null; P.setY = 0; P.acabou = false;
   ({ est: P.est, seq: P.seq } = montarSequencia(P.m));
+  P.intro = temposValidos() ? 0 : (P.m.intro || 0);   // com tempo ensinado, a gravação já inclui a introdução
   P.modo = modoPreferido;
   renderCifra();
   corpo.scrollTop = 0;
@@ -1639,7 +1736,7 @@ function carregarNoPalco(i){
   P.vel = P.m.velocidade || 1; P.transp = P.m.transp || 0; P.fonte = P.m.fonte || 0; P.alterado = false;
   $("p-titulo").textContent = P.m.titulo;
   const pos = P.fila.length > 1 ? `${i+1} de ${P.fila.length} · ` : "";
-  $("p-sub").textContent = pos + (P.m.artista || "") + (P.m.duracao ? "" : " · sem duração: usando 3:00");
+  $("p-sub").textContent = pos + (P.m.artista || "") + (P.m.tempos ? " · tempo ensinado" : P.m.duracao ? "" : " · sem duração: usando 3:00");
   $("p-proxima").hidden = true;
   setTocando(false);
   reiniciarMusica();
@@ -1665,6 +1762,7 @@ function salvarAjustesPalco(){
 }
 function sairPalco(){
   if (P.travado) destravar(true);
+  if (P.gravando) cancelarGravacao(true);
   setTocando(false); salvarAjustesPalco();
   cancelAnimationFrame(P.raf); P.raf = 0;
   try { P.wake?.release(); } catch {} P.wake = null;
@@ -1684,6 +1782,7 @@ function ajustarVel(d){ P.vel = Math.max(0.3, Math.min(3, Math.round((P.vel + d)
 // Tocando: pulo imediato (a rolagem automática continua dali). Parado: pulo suave.
 function rolarPara(y){ if (P.tocando) corpo.scrollTop = y; else corpo.scrollTo({ top: y, behavior: "smooth" }); }
 function rolarTela(dir){
+  if (P.gravando){ if (dir > 0) marcarMudanca(); else toast("Gravando: só dá para avançar. Para recomeçar, toque em Cancelar."); return; }
   if (P.modo === "salto" && temPartes()){
     // Pedal: avança ou volta uma parte do roteiro.
     irParaParte(Math.max(0, Math.min(P.seq.length - 1, P.passo + dir)));
@@ -1692,8 +1791,10 @@ function rolarTela(dir){
   P.pos = Math.max(0, corpo.scrollTop + dir * corpo.clientHeight * 0.5); rolarPara(P.pos);
 }
 function alternar(){
-  const noFim = P.modo === "salto" && temPartes() ? P.acabou : P.pos >= corpo.scrollHeight - corpo.clientHeight * 1.55 - 1;
+  desbloquearAudio();
+  const noFim = usaPassos() ? P.acabou : P.pos >= corpo.scrollHeight - corpo.clientHeight * 1.55 - 1;
   if (!P.tocando && noFim) reiniciarMusica();
+  if (!P.tocando && P.decorrido === 0 && !P.gravando) prepararContagem();
   setTocando(!P.tocando);
 }
 
@@ -1702,7 +1803,7 @@ $("p-repetir").onclick = repetirParte;
 $("p-modo").onclick = trocarModo;
 corpo.addEventListener("scroll", () => {
   if (P.tocando) return;
-  if (P.modo === "salto" && temPartes() && P.passos.length && Math.abs(corpo.scrollTop - P.setY) > 4) ressincronizar();
+  if (usaPassos() && P.passos.length && Math.abs(corpo.scrollTop - P.setY) > 4 && !P.gravando) ressincronizar();
   marcarParteAtual();
 }, { passive: true });
 $("p-sair").onclick = sairPalco;
@@ -1710,12 +1811,121 @@ $("p-lento").onclick = () => ajustarVel(-0.1);
 $("p-rapido").onclick = () => ajustarVel(0.1);
 $("p-ant").onclick = () => { if (P.i > 0) carregarNoPalco(P.i - 1); };
 $("p-prox").onclick = () => { if (P.i < P.fila.length - 1) carregarNoPalco(P.i + 1); };
-$("p-proxima-ir").onclick = () => { carregarNoPalco(P.i + 1); setTocando(true); };
+$("p-proxima-ir").onclick = () => { carregarNoPalco(P.i + 1); alternar(); };
 $("p-tom-menos").onclick = () => { P.transp = (P.transp - 1) % 12; P.alterado = true; renderCifra(); };
 $("p-tom-mais").onclick = () => { P.transp = (P.transp + 1) % 12; P.alterado = true; renderCifra(); };
 $("p-fonte-menos").onclick = () => { P.fonte = Math.max(12, (P.fonte || fonteAuto()) - 2); P.alterado = true; aplicarFonte(); };
 $("p-fonte-mais").onclick = () => { P.fonte = Math.min(60, (P.fonte || fonteAuto()) + 2); P.alterado = true; aplicarFonte(); };
 window.addEventListener("resize", () => { if ($("palco").hidden) return; medirUI(); if (!P.fonte) aplicarFonte(); else calcularPassos(); });
+
+/* ---------- Contagem, pulso do metrônomo e som ---------- */
+let audioCtx = null;
+function desbloquearAudio(){
+  if (prefs.somContagem !== "sim") return;
+  try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === "suspended") audioCtx.resume(); } catch {}
+}
+function clique(forte){
+  if (prefs.somContagem !== "sim" || !audioCtx) return;
+  try {
+    const t = audioCtx.currentTime, o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.frequency.value = forte ? 1600 : 1000;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.6, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+    o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + 0.1);
+  } catch {}
+}
+function bpmDaMusica(){ const b = +P.m?.bpm; return b >= 30 && b <= 300 ? b : 0; }
+// Antes de rolar: um compasso de contagem no BPM da música (ou 3, 2, 1 ao ensinar o tempo sem BPM).
+function prepararContagem(regressiva){
+  const bpm = bpmDaMusica();
+  if (bpm) P.contagem = { batida: 60 / bpm, total: +P.m.compasso || 4, t: 0, n: -1, regressiva: false };
+  else if (regressiva) P.contagem = { batida: 1, total: 3, t: 0, n: -1, regressiva: true };
+  else P.contagem = null;
+}
+function passoContagem(dt){
+  const c = P.contagem, el = $("p-contagem");
+  c.t += dt;
+  const n = Math.floor(c.t / c.batida);
+  if (n >= c.total){ P.contagem = null; el.hidden = true; el.classList.remove("bate"); P.ultimaBatida = -1; if (P.gravando) atualizarGravacao(); return; }
+  if (n !== c.n){
+    c.n = n; el.hidden = false;
+    el.textContent = c.regressiva ? String(c.total - n) : String(n + 1);
+    el.classList.remove("bate"); void el.offsetWidth; el.classList.add("bate");
+    clique(n === 0);
+  }
+}
+function pulsar(){
+  const el = $("p-pulso"), bpm = bpmDaMusica();
+  if (!bpm || prefs.pulso === "nao"){ el.hidden = true; return; }
+  el.hidden = false;
+  const b = Math.floor(P.decorrido * bpm / 60);
+  if (b === P.ultimaBatida) return;
+  P.ultimaBatida = b;
+  el.classList.toggle("um", b % (+P.m.compasso || 4) === 0);
+  el.classList.remove("on"); void el.offsetWidth; el.classList.add("on");
+}
+
+/* ---------- Ensinar o tempo: o músico marca cada mudança de parte ---------- */
+function iniciarGravacao(){
+  desbloquearAudio();
+  setTocando(false);
+  P.gravando = { duracoes: [], inicio: 0 };
+  P.vel = 1;
+  if (temPartes()) P.modo = "salto";
+  ({ est: P.est, seq: P.seq } = montarSequencia(P.m));
+  P.pos = 0; P.decorrido = 0; P.durExtra = 0; P.intro = 0; P.passo = 0; P.tPasso = 0; P.anim = null; P.acabou = false; P.ultimaBatida = -1;
+  renderCifra(); corpo.scrollTop = 0; P.setY = 0; calcularPassos();
+  $("p-grav").hidden = false; $("p-proxima").hidden = true;
+  prepararContagem(true);
+  atualizarGravacao();
+  setTocando(true);
+  toast("Toque a música. A cada mudança de parte, toque na parte de baixo da tela ou aperte ↓ no pedal.");
+}
+function atualizarGravacao(){
+  const g = P.gravando; if (!g) return;
+  const nome = temPartes() ? (P.est.defs.get(P.seq[P.passo]?.key)?.nome || "Parte") : "Música inteira";
+  const prox = temPartes() && P.seq[P.passo + 1] ? (P.est.defs.get(P.seq[P.passo + 1].key)?.nome || "") : "";
+  $("p-grav-parte").textContent = nome + " · " + fmtTempo(Math.max(0, P.decorrido - g.inicio));
+  $("p-grav-dica").textContent = P.contagem ? "Prepare-se…" : prox ? "Quando começar " + prox.toLowerCase() + ": toque embaixo ou ↓" : "Última parte: toque embaixo ou ↓ quando a música acabar";
+}
+function marcarMudanca(){
+  const g = P.gravando; if (!g || P.contagem) return;
+  g.duracoes.push(Math.max(0.5, P.decorrido - g.inicio)); g.inicio = P.decorrido;
+  if (!temPartes() || P.passo >= P.passos.length - 1) return concluirGravacao();
+  P.passo++; P.tPasso = 0; P.anim = { from: corpo.scrollTop, t: 0 };
+  marcarParteAtual(); atualizarGravacao();
+}
+function concluirGravacao(){
+  const g = P.gravando; if (!g) return;
+  if (g.duracoes.length <= P.passo && P.decorrido - g.inicio > 0.5) g.duracoes.push(P.decorrido - g.inicio);
+  if (!g.duracoes.length){ cancelarGravacao(); return; }
+  const m = { ...P.m };
+  if (!temPartes()){
+    m.duracao = Math.round(g.duracoes[0]);
+  } else {
+    // Partes que não chegaram a ser marcadas: estima pelo ritmo das que foram.
+    const pesos = P.seq.map((it) => linhasDaParte(it.key));
+    const feitas = g.duracoes.length;
+    const ritmo = g.duracoes.reduce((a, b) => a + b, 0) / pesos.slice(0, feitas).reduce((a, b) => a + b, 0);
+    const dur = P.seq.map((_, i) => i < feitas ? g.duracoes[i] : pesos[i] * ritmo).map((x) => Math.round(x * 10) / 10);
+    m.tempos = { roteiro: P.seq.map((x) => x.key), dur, em: Date.now() };
+    m.duracao = Math.round(dur.reduce((a, b) => a + b, 0));
+  }
+  P.gravando = null; $("p-grav").hidden = true;
+  P.m = m; P.modo = modoPreferido; P.alterado = false;
+  store.salvarMusica(m);
+  setTocando(false); reiniciarMusica(); atualizarRelogio();
+  $("p-sub").textContent = (P.m.artista || "") + " · tempo ensinado";
+  toast("Tempo ensinado (" + fmtTempo(m.duracao) + "). Agora a rolagem segue o seu andamento.");
+}
+function cancelarGravacao(silencioso){
+  if (!P.gravando) return;
+  P.gravando = null; $("p-grav").hidden = true; P.modo = modoPreferido;
+  setTocando(false); reiniciarMusica(); atualizarRelogio();
+  if (!silencioso) toast("Gravação cancelada. O tempo anterior foi mantido.");
+}
+$("p-ensinar").onclick = iniciarGravacao;
+$("p-grav-ok").onclick = concluirGravacao;
+$("p-grav-x").onclick = () => cancelarGravacao();
 
 /* ---------- Modo show: controles que somem, zonas de toque e trava ---------- */
 const palco = $("palco");
@@ -1835,6 +2045,8 @@ function renderPrefs(){
   }
   botoesEscolha($("pref-modo"), [{ id: "salto", nome: "Saltar" }, { id: "corrido", nome: "Corrido" }], prefs.modo, (v) => definirPref("modo", v));
   botoesEscolha($("pref-letra"), LETRAS, prefs.letra, (v) => definirPref("letra", v));
+  botoesEscolha($("pref-som"), [{ id: "nao", nome: "Desligado" }, { id: "sim", nome: "Ligado" }], prefs.somContagem || "nao", (v) => definirPref("somContagem", v));
+  botoesEscolha($("pref-pulso"), [{ id: "sim", nome: "Ligado" }, { id: "nao", nome: "Desligado" }], prefs.pulso || "sim", (v) => definirPref("pulso", v));
 }
 $("pref-nome").addEventListener("change", () => definirPref("nome", $("pref-nome").value.trim().slice(0, 60)));
 $("pref-intro").addEventListener("change", () => definirPref("intro", Math.max(0, Math.min(60, parseInt($("pref-intro").value, 10) || 0))));
@@ -2062,7 +2274,7 @@ const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platfo
 let dicaVista = false; try { dicaVista = localStorage.getItem("dica-ios") === "1"; } catch {}
 if (ehIOS && !instalado && !dicaVista && !dentroDeFrame) $("ios-dica").hidden = false;
 $("ios-fechar").onclick = () => { $("ios-dica").hidden = true; try { localStorage.setItem("dica-ios", "1"); } catch {} };
-const VERSAO_APP = "v9 · modo show";
+const VERSAO_APP = "v10 · tempo";
 if ("serviceWorker" in navigator && location.protocol === "https:" && !dentroDeFrame) {
   const tinhaControle = !!navigator.serviceWorker.controller;
   let recarregou = false;
