@@ -33,6 +33,25 @@ Depois de instalado, o app abre em tela cheia e funciona **sem internet** (as m�
 - **Setlist**: ordem do show, tempo total e passagem automática para a próxima música.
 - **Cronômetro**: mede a duração ouvindo a música (toca no relógio no começo e no fim).
 
+## Recursos de palco (fluidez ao tocar)
+
+- **Modo show**: tocando, só a cifra fica na tela; toque no meio mostra os controles, em cima volta e embaixo avança uma parte. **Travar** ignora toques acidentais (segure 1 s para destravar). Letra automática pela largura e altura da tela.
+- **Ensinar tempo** (Mais → Ensinar tempo): toque a música uma vez marcando cada mudança de parte; a rolagem passa a seguir o seu andamento.
+- **BPM e contagem**: BPM com botão *Bater*; contagem de um compasso antes de rolar (som opcional) e pulso visual no tempo.
+- **Transição**: ao fim de cada música do setlist, cartão da próxima com tom, capo, duração e anotação; início automático opcional (10 s ou 30 s).
+- **Acordes**: toque no acorde para ver o desenho no violão; painel com todos os acordes; **capo** que muda as formas sem mudar o tom, com sugestão de capo fácil; **Simplificar**.
+- **Setlist do bar**: arrastar para reordenar, músicas tocadas marcadas (o show continua da próxima), **pedido do público** (também no meio do show), cronômetro de **intervalo**.
+- **Etiquetas** nas músicas e filtro no repertório.
+- **Pedal configurável** (Conta e preferências → Pedal e teclado).
+- **Tablet deitado**: a música inteira em duas colunas quando cabe.
+- **Tocar junto** (aba Setlist): sala com código; um aparelho comanda e os outros acompanham play, partes e repetições, cada um com seu tom e letra.
+
+## Play Store
+
+- Guia completo: [docs/PLAY-STORE.md](docs/PLAY-STORE.md)
+- Política de privacidade: https://szadil763.github.io/cifras-show/privacidade.html
+- Exclusão de conta dentro do app (ícone de pessoa → Excluir minha conta), via função `excluir_minha_conta()` no Supabase.
+
 ## Conta e preferências
 
 - **Login com email e senha** (botão de pessoa no topo): guarda músicas, setlist e preferências na nuvem (Supabase, projeto `cifras-show`) para usar em vários aparelhos. O app continua salvando primeiro no aparelho e funciona offline; sincroniza ao entrar, ao salvar, ao voltar para o app e quando a internet volta. Se a mesma música mudou em dois aparelhos, vale a versão mais recente.

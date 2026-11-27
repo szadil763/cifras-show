@@ -573,6 +573,16 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
           <button class="btn" id="c-sinc" type="button">Sincronizar agora</button>
           <button class="btn danger" id="c-sair" type="button">Sair da conta</button>
         </div>
+        <button class="linkbtn" id="c-excluir-abrir" type="button" style="justify-self:start;color:var(--live)">Excluir minha conta</button>
+        <div class="notice err" id="c-excluir-box" hidden>
+          <p style="margin:0 0 8px"><b>Excluir a conta apaga, para sempre, o seu cadastro e todas as músicas, setlist e preferências guardados na nuvem.</b> Não dá para desfazer.</p>
+          <label style="flex-direction:row;align-items:center;gap:8px;color:var(--fg)"><input type="checkbox" id="c-excluir-local"> Apagar também as músicas deste aparelho</label>
+          <label>Para confirmar, digite EXCLUIR<input type="text" id="c-excluir-txt" autocomplete="off" autocapitalize="characters"></label>
+          <div class="form-actions" style="justify-content:flex-start;margin-top:8px">
+            <button class="btn danger" id="c-excluir" type="button">Excluir conta para sempre</button>
+            <button class="btn ghost" id="c-excluir-cancela" type="button">Cancelar</button>
+          </div>
+        </div>
       </div>
       <form class="form" id="conta-nova" style="margin:0" hidden onsubmit="return false">
         <p style="margin:0"><b>Crie uma nova senha</b></p>
@@ -580,6 +590,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
         <button class="btn primary" id="c-salvar-senha" type="submit" style="justify-self:start">Salvar nova senha</button>
       </form>
       <div class="notice" id="c-msg" hidden role="status"></div>
+      <p class="hint" style="margin:0"><a href="privacidade.html" target="_blank" rel="noopener" style="color:var(--accent)">Política de privacidade</a></p>
     </section>
     <section class="painel">
       <h3>Preferências</h3>
@@ -2942,6 +2953,21 @@ $("c-salvar-senha").onclick = () => acaoConta($("c-salvar-senha"), async () => {
 });
 $("c-sinc").onclick = () => { nuvem.agendar(0); };
 let sairArmado = false;
+$("c-excluir-abrir").onclick = () => { $("c-excluir-box").hidden = false; $("c-excluir-txt").value = ""; $("c-excluir-txt").focus(); };
+$("c-excluir-cancela").onclick = () => { $("c-excluir-box").hidden = true; };
+$("c-excluir").onclick = () => acaoConta($("c-excluir"), async () => {
+  if ($("c-excluir-txt").value.trim().toUpperCase() !== "EXCLUIR"){ msgConta("Digite EXCLUIR no campo para confirmar.", true); $("c-excluir-txt").focus(); return; }
+  const { error } = await nuvem.sb.rpc("excluir_minha_conta");
+  if (error) throw error;
+  try { await nuvem.sb.auth.signOut(); } catch {}
+  nuvem.user = null; nuvem.ultima = 0;
+  if ($("c-excluir-local").checked){
+    estado.musicas.clear(); estado.setlist = []; estado.excluidas = {}; estado.perfilT = 0;
+    store.gravarLocal(); renderTudo();
+  }
+  $("c-excluir-box").hidden = true; renderConta(); atualizarStatus();
+  msgConta($("c-excluir-local").checked ? "Conta excluída. Seus dados foram apagados da nuvem e deste aparelho." : "Conta excluída. Seus dados foram apagados da nuvem; as músicas continuam só neste aparelho.");
+});
 $("c-sair").onclick = async () => {
   const b = $("c-sair");
   if (!sairArmado){ sairArmado = true; b.textContent = "Toque de novo para sair"; setTimeout(() => { sairArmado = false; b.textContent = "Sair da conta"; }, 3000); return; }
@@ -2970,7 +2996,7 @@ const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platfo
 let dicaVista = false; try { dicaVista = localStorage.getItem("dica-ios") === "1"; } catch {}
 if (ehIOS && !instalado && !dicaVista && !dentroDeFrame) $("ios-dica").hidden = false;
 $("ios-fechar").onclick = () => { $("ios-dica").hidden = true; try { localStorage.setItem("dica-ios", "1"); } catch {} };
-const VERSAO_APP = "v14 · banda";
+const VERSAO_APP = "v15 · loja";
 if ("serviceWorker" in navigator && location.protocol === "https:" && !dentroDeFrame) {
   const tinhaControle = !!navigator.serviceWorker.controller;
   let recarregou = false;
