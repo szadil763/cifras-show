@@ -168,8 +168,14 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 .pill button:hover{background:var(--surface-2)}
 .pill span{font-family:var(--font-mono);font-weight:700;min-width:38px;text-align:center;font-size:13px}
 .pill .k{color:var(--chord)}
+.stage-tools{flex-wrap:wrap}
+.mais-painel{display:flex;flex-wrap:wrap;gap:6px;padding:0 max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px))}
+.mais-painel[hidden]{display:none}
+#p-mais[aria-expanded="true"]{background:var(--surface-2);border-color:var(--fg)}
+#p-mais.aviso{position:relative}
+#p-mais.aviso::after{content:"";position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;background:var(--ok)}
 .p-nota{margin:0 max(12px,env(safe-area-inset-right,0px)) 2px max(12px,env(safe-area-inset-left,0px));font-size:13px;color:var(--accent);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stage-tools{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:4px max(12px,env(safe-area-inset-right,0px)) 6px max(12px,env(safe-area-inset-left,0px))}
+.stage-tools{display:flex;gap:6px;padding:4px max(12px,env(safe-area-inset-right,0px)) 6px max(12px,env(safe-area-inset-left,0px))}
 .stage-tools::-webkit-scrollbar{display:none}
 .stage-tools>*{flex:none}
 .progress{position:absolute;left:0;right:0;top:env(safe-area-inset-top,0px);z-index:4;height:4px;background:var(--surface-2)}
@@ -272,6 +278,32 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 .sugestoes{display:flex;flex-wrap:wrap;gap:6px;margin-top:-6px}
 .sugestoes:empty{display:none}
 .sugestoes button{border:1px dashed var(--line);background:none;border-radius:999px;padding:3px 10px;font-size:12px;color:var(--muted)}
+.sheet-alta{z-index:40}
+.filtros{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:-4px 0 12px}
+.filtros::-webkit-scrollbar{display:none}
+.filtros:empty{display:none}
+.filtros .opcao{flex:none;padding:6px 12px;font-size:13px}
+.song-meta .etq{font-size:11px;border:1px solid var(--line);border-radius:999px;padding:0 7px}
+.set-extra{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:-4px 0 12px}
+.set-extra .opcao{padding:5px 12px;font-size:13px}
+.intervalo-card{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface));border-radius:14px;padding:12px 16px;margin:0 0 12px}
+.intervalo-card small{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.intervalo-card b{font-family:var(--font-display);font-size:40px;line-height:1;font-variant-numeric:tabular-nums}
+.intervalo-card.fim{border-color:var(--live);background:color-mix(in srgb,var(--live) 15%,var(--surface))}
+.song.set.tocada{opacity:.55}
+.song.set.tocada .pos{color:var(--ok)}
+.song.set.agora-show{border-color:var(--accent)}
+.song.set{grid-template-columns:auto auto 1fr auto;transition:transform .15s}
+.song.set.arrastando{transition:none;z-index:2;position:relative;box-shadow:0 8px 24px rgba(0,0,0,.5);opacity:1}
+.arrastar{background:none;border:0;color:var(--muted);font-size:18px;letter-spacing:-3px;padding:8px 4px;cursor:grab;touch-action:none}
+.pedal{display:grid;gap:8px}
+.pedal-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
+.pedal-acao{font-size:14px}
+.pedal-teclas{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.pedal-teclas kbd{font-family:var(--font-mono);font-size:12px;border:1px solid var(--line);border-radius:5px;padding:2px 6px;background:var(--surface)}
+.pedal-row .btn{min-height:36px;padding:6px 12px;font-size:13px}
+.sheet-music.duas{column-count:2;column-gap:48px}
+.sheet-music.duas .bloco{break-inside:avoid}
 .tempos-info{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:13px}
 .tempos-info:empty{display:none}
 .linkbtn{background:none;border:0;color:var(--accent);font-weight:600;font-size:13px;padding:4px}
@@ -282,6 +314,8 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;z-index:50;font-size:14px;max-width:90vw}
 
 @media (max-width:520px){
+  .pedal-row{grid-template-columns:1fr auto}
+  .pedal-row .pedal-teclas{grid-column:1/-1;justify-content:flex-start;order:3}
   .row{grid-template-columns:1fr 1fr}
   .row .wide{grid-column:1/-1}
   .clock,.speed{min-width:0}
@@ -336,6 +370,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
       <a class="btn" id="web-g" target="_blank" rel="noopener">No Google</a>
       <span class="web-q" id="web-dica" hidden style="white-space:normal">Mais rápido: na página da cifra, toque e segure, escolha <b>Selecionar tudo</b> e depois <b>Compartilhar → Cifra no Palco</b>.</span>
     </div>
+    <div class="filtros" id="filtros"></div>
     <ul class="list" id="lista"></ul>
     <p class="hint" id="versao" style="margin-top:24px;text-align:center"></p>
   </section>
@@ -344,12 +379,22 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
     <div class="actions">
       <button class="btn primary" id="btn-show">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>
-        Começar o show
+        <span id="btn-show-txt">Começar o show</span>
       </button>
-      <button class="btn" id="btn-limpar-set">Limpar setlist</button>
+      <button class="btn" id="btn-pedido">Pedido do público</button>
+    </div>
+    <div class="intervalo-card" id="intervalo-card" hidden>
+      <div><small id="intervalo-rot">Intervalo · volta em</small><b id="intervalo-tempo">15:00</b></div>
+      <button class="btn" id="intervalo-fim">Encerrar intervalo</button>
+    </div>
+    <div class="set-extra">
+      <span class="hint">Intervalo:</span>
+      <button class="opcao" id="btn-int-10" type="button">10 min</button><button class="opcao" id="btn-int-15" type="button">15 min</button><button class="opcao" id="btn-int-20" type="button">20 min</button>
+      <button class="linkbtn" id="btn-nova-noite" type="button" hidden>Nova noite (desmarcar tocadas)</button>
     </div>
     <ol class="list" id="setlist"></ol>
-    <p class="hint" style="margin-top:14px">Use as setas para mudar a ordem. No palco, a próxima música aparece quando a atual termina, ou com a seta → do teclado ou pedal.</p>
+    <p class="hint" style="margin-top:14px">Arraste pela alça <b>⋮⋮</b> para mudar a ordem. As músicas tocadas ficam marcadas e o show continua da próxima.</p>
+    <button class="linkbtn" id="btn-limpar-set" type="button" style="margin-top:6px;color:var(--live)">Limpar setlist</button>
   </section>
 </main>
 
@@ -527,7 +572,26 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
       <div class="campo"><span>Som na contagem antes de rolar</span><div class="opcoes" id="pref-som"></div></div>
       <div class="campo"><span>Pulso do metrônomo na tela (músicas com BPM)</span><div class="opcoes" id="pref-pulso"></div></div>
       <label>Espera antes de rolar, em músicas novas (segundos)<input type="text" id="pref-intro" inputmode="numeric" placeholder="0"></label>
+      <div class="campo"><span>Duas colunas em tablet deitado (modo Saltar)</span><div class="opcoes" id="pref-colunas"></div></div>
     </section>
+    <section class="painel">
+      <h3>Pedal e teclado</h3>
+      <p class="hint" style="margin:0">Pedais Bluetooth de virar página funcionam como teclado. Toque em <b>Definir</b> e aperte o botão do pedal que deve fazer aquela ação.</p>
+      <div class="pedal" id="pref-pedal"></div>
+      <button class="linkbtn" id="pedal-padrao" type="button" style="justify-self:start">Voltar ao padrão</button>
+    </section>
+  </div>
+</div>
+
+<!-- Pedido do público -->
+<div class="sheet sheet-alta" id="pedido" hidden>
+  <div class="sheet-head"><div class="sheet-head-inner">
+    <button class="btn ghost icon-btn" id="pedido-fechar" aria-label="Voltar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <h2 id="pedido-h">Pedido do público</h2>
+  </div></div>
+  <div class="wrap">
+    <input class="search" id="pedido-busca" type="search" placeholder="Nome da música, artista ou etiqueta" aria-label="Buscar música" style="margin-top:16px">
+    <ul class="list" id="pedido-lista"></ul>
   </div>
 </div>
 
@@ -544,15 +608,19 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
     <p class="p-nota" id="p-nota" hidden></p>
     <div class="stage-tools">
       <div class="pill" title="Mudar o tom"><button id="p-tom-menos" aria-label="Meio tom abaixo">−</button><span class="k" id="p-tom">G</span><button id="p-tom-mais" aria-label="Meio tom acima">+</button></div>
+      <button class="btn-rep" id="p-repetir" title="Toca a parte atual mais uma vez (tecla R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></svg><span id="p-repetir-txt">Repetir parte</span></button>
+      <button class="btn-rep" id="p-pedido" title="Escolher uma música do repertório para tocar em seguida"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Pedido</span></button>
+      <button class="btn-rep" id="p-trava" title="Trava a tela contra toques sem querer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Travar</span></button>
+      <button class="btn-rep" id="p-mais" aria-expanded="false" aria-controls="p-mais-painel" title="Letra, capo, acordes, modo de rolagem e ensinar tempo"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg><span>Mais</span></button>
+    </div>
+    <div class="mais-painel" id="p-mais-painel" hidden>
       <div class="pill" title="Tamanho da letra"><button id="p-fonte-menos" aria-label="Diminuir letra">A−</button><button id="p-fonte-mais" aria-label="Aumentar letra">A+</button></div>
       <div class="pill" title="Capotraste: muda as formas dos acordes sem mudar o tom"><button id="p-capo-menos" aria-label="Capo uma casa abaixo">−</button><span id="p-capo">Capo 0</span><button id="p-capo-mais" aria-label="Capo uma casa acima">+</button></div>
       <button class="btn-rep" id="p-capo-facil" hidden></button>
       <button class="btn-rep" id="p-simplificar" aria-pressed="false" title="Troca acordes difíceis por versões básicas"><span>Simplificar</span></button>
       <button class="btn-rep" id="p-acordes-btn" title="Desenho de todos os acordes da música"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M5 8h14M9.7 3v18M14.3 3v18"/></svg><span>Acordes</span></button>
-      <button class="btn-rep" id="p-repetir" title="Toca a parte atual mais uma vez (tecla R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></svg><span id="p-repetir-txt">Repetir parte</span></button>
       <button class="btn-rep" id="p-modo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 20V4M3 8l4-4 4 4M17 4v16M13 16l4 4 4-4"/></svg><span id="p-modo-txt">Saltar</span></button>
       <button class="btn-rep" id="p-ensinar" title="Toque a música uma vez marcando as mudanças de parte; a rolagem passa a seguir esse tempo"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="var(--live)"/></svg><span>Ensinar tempo</span></button>
-      <button class="btn-rep" id="p-trava" title="Trava a tela contra toques sem querer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Travar</span></button>
     </div>
     <nav class="mapa" id="p-mapa" aria-label="Partes da música"></nav>
   </div>
@@ -1030,14 +1098,29 @@ function metaLinha(m){
   const d = document.createElement("span"); d.className = "dur"; d.textContent = m.duracao ? fmtTempo(m.duracao) : "sem duração";
   meta.append(k, a, d);
   if (m.exemplo){ const t = document.createElement("span"); t.className = "tag-ex"; t.textContent = "exemplo"; meta.append(t); }
+  for (const e of (m.etiquetas || []).slice(0, 3)){ const t = document.createElement("span"); t.className = "etq"; t.textContent = e; meta.append(t); }
   return meta;
 }
 
+let filtroEtiqueta = "";
+function renderFiltros(){
+  const box = $("filtros"); box.textContent = "";
+  const etqs = todasEtiquetas();
+  if (!etqs.length){ filtroEtiqueta = ""; return; }
+  if (filtroEtiqueta && !etqs.includes(filtroEtiqueta)) filtroEtiqueta = "";
+  for (const e of ["", ...etqs]){
+    const b = document.createElement("button"); b.type = "button"; b.className = "opcao"; b.textContent = e || "Todas";
+    b.setAttribute("aria-pressed", e === filtroEtiqueta);
+    b.onclick = () => { filtroEtiqueta = e; renderRepertorio(); };
+    box.append(b);
+  }
+}
 function renderRepertorio(){
   const ul = $("lista"); ul.textContent = "";
+  renderFiltros();
   const q = $("busca").value.trim().toLowerCase();
   const todas = [...estado.musicas.values()].sort((a,b) => (a.titulo||"").localeCompare(b.titulo||"", "pt"));
-  const lista = todas.filter((m) => !q || (m.titulo + " " + (m.artista||"")).toLowerCase().includes(q));
+  const lista = todas.filter((m) => (!q || (m.titulo + " " + (m.artista||"") + " " + (m.etiquetas || []).join(" ")).toLowerCase().includes(q)) && (!filtroEtiqueta || (m.etiquetas || []).includes(filtroEtiqueta)));
   $("count-rep").textContent = todas.length;
   if (!estado.pronto){ const li = document.createElement("li"); li.className = "empty"; li.textContent = "Carregando seu repertório…"; ul.append(li); return; }
   if (!todas.length){
@@ -1068,31 +1151,44 @@ function renderSetlist(){
   estado.setlist = estado.setlist.filter((id) => estado.musicas.has(id) || !estado.pronto);
   $("count-set").textContent = estado.setlist.length;
   $("btn-show").disabled = !estado.setlist.length;
-  $("btn-limpar-set").disabled = !estado.setlist.length;
+  $("btn-limpar-set").hidden = !estado.setlist.length;
+  noite.ids = noite.ids.filter((id) => estado.setlist.includes(id));
+  const tocadas = estado.setlist.filter((id) => noite.ids.includes(id)).length;
+  $("btn-show-txt").textContent = tocadas && tocadas < estado.setlist.length ? "Continuar o show (" + (tocadas + 1) + "ª)" : "Começar o show";
+  $("btn-nova-noite").hidden = !tocadas;
   if (!estado.setlist.length){
     const li = document.createElement("li"); li.className = "empty";
     li.innerHTML = `<strong>Nenhuma música no setlist</strong><span>No repertório, toque no ícone de lista ao lado de cada música para montar a sequência da noite.</span>`;
     ol.append(li); return;
   }
-  let total = 0;
+  let total = 0, falta = 0, faltaN = 0;
   estado.setlist.forEach((id, i) => {
     const m = estado.musicas.get(id); if (!m) return; total += m.duracao || 0;
-    const li = document.createElement("li"); li.className = "song set";
-    const pos = document.createElement("span"); pos.className = "pos"; pos.textContent = i + 1;
+    const tocada = noite.ids.includes(id);
+    if (!tocada){ falta += m.duracao || 0; faltaN++; }
+    const li = document.createElement("li"); li.className = "song set" + (tocada ? " tocada" : "");
+    const alca = document.createElement("button"); alca.type = "button"; alca.className = "arrastar"; alca.textContent = "⋮⋮";
+    alca.setAttribute("aria-label", "Arrastar " + m.titulo + " para mudar a ordem (setas do teclado também movem)");
+    alca.addEventListener("pointerdown", (e) => iniciarArrasto(e, li, i));
+    alca.addEventListener("keydown", (e) => {
+      const d = e.key === "ArrowUp" ? -1 : e.key === "ArrowDown" ? 1 : 0; if (!d) return;
+      e.preventDefault(); const j = i + d; if (j < 0 || j >= estado.setlist.length) return;
+      const s2 = estado.setlist; [s2[i], s2[j]] = [s2[j], s2[i]]; store.salvarSetlist();
+      setTimeout(() => $("setlist").querySelectorAll(".arrastar")[j]?.focus(), 0);
+    });
+    const pos = document.createElement("span"); pos.className = "pos"; pos.textContent = tocada ? "✓" : i + 1;
     const main = document.createElement("button"); main.className = "song-main";
     const t = document.createElement("div"); t.className = "song-title"; t.textContent = m.titulo;
     main.append(t, metaLinha(m)); main.onclick = () => abrirPalco(estado.setlist.slice(), i);
     const btns = document.createElement("div"); btns.className = "song-btns";
-    const up = svgBtn('<path d="M6 15l6-6 6 6"/>', "Subir"); up.disabled = i === 0;
-    up.onclick = () => { const s = estado.setlist; [s[i-1], s[i]] = [s[i], s[i-1]]; store.salvarSetlist(); };
-    const dn = svgBtn('<path d="M6 9l6 6 6-6"/>', "Descer"); dn.disabled = i === estado.setlist.length - 1;
-    dn.onclick = () => { const s = estado.setlist; [s[i+1], s[i]] = [s[i], s[i+1]]; store.salvarSetlist(); };
     const rm = svgBtn('<path d="M6 6l12 12M18 6L6 18"/>', "Tirar do setlist");
     rm.onclick = () => { estado.setlist.splice(i, 1); store.salvarSetlist(); };
-    btns.append(up, dn, rm); li.append(pos, main, btns); ol.append(li);
+    btns.append(rm); li.append(alca, pos, main, btns); ol.append(li);
   });
   const p = document.createElement("li"); p.className = "hint"; p.style.listStyle = "none"; p.style.marginTop = "6px";
-  p.textContent = `Tempo total do show: ${fmtTempo(total)} (${estado.setlist.length} músicas)`;
+  p.textContent = faltaN < estado.setlist.length
+    ? `Faltam ${faltaN} música${faltaN === 1 ? "" : "s"} · ${fmtTempo(falta)} (show inteiro: ${fmtTempo(total)})`
+    : `Tempo total do show: ${fmtTempo(total)} (${estado.setlist.length} músicas)`;
   ol.append(p);
 }
 function renderTudo(){ renderRepertorio(); renderSetlist(); }
@@ -1119,7 +1215,7 @@ $("busca").oninput = () => { renderRepertorio(); atualizarBuscaWeb(); };
 $("busca").addEventListener("keydown", (e) => {
   if (e.key === "Enter" && $("busca").value.trim().length >= 2 && !$("lista").querySelector(".song")) $("web-cc").click();
 });
-$("btn-show").onclick = () => abrirPalco(estado.setlist.slice(), 0);
+$("btn-show").onclick = () => abrirPalco(estado.setlist.slice(), primeiraNaoTocada());
 let limparArmado = false;
 $("btn-limpar-set").onclick = () => {
   const b = $("btn-limpar-set");
@@ -1655,6 +1751,8 @@ function cabecalhoParte(nome, extra){
 function renderCifra(){
   const m = P.m, el = $("p-cifra"); el.textContent = "";
   const bemol = usarBemol(m.tom, deslocamento(), m.texto || "");
+  P.duas = prefs.colunas !== "nao" && P.modo === "salto" && temPartes() && !P.gravando && corpo.clientWidth >= 900 && corpo.clientWidth > corpo.clientHeight;
+  el.classList.toggle("duas", P.duas);
   for (const l of P.est.preambulo) el.append(linhaPalco(l, bemol));
   if (P.modo === "salto"){
     // Cada parte uma vez, na ordem em que está escrita.
@@ -1735,14 +1833,14 @@ function calcularPassos(){
   P.passos = P.seq.map((it, i) => {
     const b = blocoDoPasso(i, it.key);
     const topo = b ? yDe(b) : 0, alt = b ? b.offsetHeight : 0;
-    const start = Math.max(0, topo - H * 0.06);
-    return { key: it.key, dur: ensinado ? ensinado[i] : tempo * pesos[i] / soma, start, fimBloco: Math.max(start, topo + alt - H * 0.7), proximoColado: false, end: 0 };
+    const start = P.duas ? 0 : Math.max(0, topo - H * 0.06);   // duas colunas: tudo cabe, a tela não rola
+    return { key: it.key, dur: ensinado ? ensinado[i] : tempo * pesos[i] / soma, start, fimBloco: P.duas ? 0 : Math.max(start, topo + alt - H * 0.7), proximoColado: false, end: 0 };
   });
   P.passos.forEach((p, i) => {
     const nx = P.passos[i + 1];
     const b = blocoDoPasso(i, p.key), bn = nx ? blocoDoPasso(i + 1, nx.key) : null;
     // Se a próxima parte vem logo abaixo na folha, rola direto até ela; senão, salta.
-    p.proximoColado = !!(b && bn && b.nextElementSibling === bn);
+    p.proximoColado = !!(b && bn && b.nextElementSibling === bn && yDe(bn) >= yDe(b));   // em duas colunas, ir para a outra coluna é salto
     p.end = p.proximoColado ? nx.start : p.fimBloco;
   });
 }
@@ -1795,6 +1893,7 @@ function repetirParte(){
 }
 // O músico rolou com o dedo: descobre em que parte do roteiro ele está.
 function ressincronizar(){
+  if (P.duas){ P.setY = corpo.scrollTop; return; }   // em duas colunas a altura não diz a parte: segue o roteiro
   const y = corpo.scrollTop, linha = y + corpo.clientHeight * 0.25;
   let key = null, idx = 0;
   for (const b of $("p-cifra").querySelectorAll(".bloco")){ if (yDe(b) <= linha){ key = b.dataset.key; idx = +b.dataset.i || 0; } else break; }
@@ -1810,12 +1909,20 @@ function ressincronizar(){
 }
 function fonteAuto(){
   const maior = Math.max(20, ...(P.m.texto || "").split("\n").map((l) => l.replace(/\s+$/,"").length));
-  const larg = corpo.clientWidth - 32;
+  const larg = P.duas ? (corpo.clientWidth - 32 - 48) / 2 : corpo.clientWidth - 32;
   // Cabe a linha mais longa na largura e pelo menos ~11 linhas na altura (celular deitado).
   const porAltura = Math.floor(corpo.clientHeight / (11 * 1.35));
   return Math.max(13, Math.min(34, Math.floor(larg / (maior * 0.64)), porAltura));
 }
 function aplicarFonte(){
+  // Duas colunas só quando a música inteira cabe na tela (nada rola, a parte atual fica destacada).
+  if (P.duas){
+    const linhas = $("p-cifra").querySelectorAll(".l").length || 1;
+    const alt = corpo.clientHeight - $("p-ui-top").offsetHeight - 24;
+    const cabe = Math.floor(alt * 2 / (linhas * 1.12 * 1.35));
+    if (cabe < 18){ P.duas = false; $("p-cifra").classList.remove("duas"); }
+    else { $("p-cifra").style.fontSize = (P.fonte || Math.min(cabe, Math.round(fonteAuto() * escalaLetra()))) + "px"; calcularPassos(); return; }
+  }
   $("p-cifra").style.fontSize = (P.fonte || Math.round(fonteAuto() * escalaLetra())) + "px";
   calcularPassos();
 }
@@ -1910,6 +2017,7 @@ function loop(t){
 }
 function terminou(){
   P.acabou = true;
+  marcarTocada(P.m?.id);
   setTocando(false);
   mostrarProxima();
 }
@@ -1960,6 +2068,7 @@ function reiniciarMusica(){
 }
 function carregarNoPalco(i){
   pararTransicao();
+  if (P.m && P.decorrido > 20) marcarTocada(P.m.id);
   salvarAjustesPalco();
   P.i = i; P.m = estado.musicas.get(P.fila[i]);
   if (!P.m) return;
@@ -1995,6 +2104,7 @@ function salvarAjustesPalco(){
 }
 function sairPalco(){
   pararTransicao();
+  if (P.m && P.decorrido > 20) marcarTocada(P.m.id);
   if (P.travado) destravar(true);
   if (P.gravando) cancelarGravacao(true);
   setTocando(false); salvarAjustesPalco();
@@ -2050,7 +2160,13 @@ $("p-tom-menos").onclick = () => { P.transp = (P.transp - 1) % 12; P.alterado = 
 $("p-tom-mais").onclick = () => { P.transp = (P.transp + 1) % 12; P.alterado = true; renderCifra(); };
 $("p-fonte-menos").onclick = () => { P.fonte = Math.max(12, (P.fonte || fonteAuto()) - 2); P.alterado = true; aplicarFonte(); };
 $("p-fonte-mais").onclick = () => { P.fonte = Math.min(60, (P.fonte || fonteAuto()) + 2); P.alterado = true; aplicarFonte(); };
-window.addEventListener("resize", () => { if ($("palco").hidden) return; medirUI(); if (!P.fonte) aplicarFonte(); else calcularPassos(); });
+window.addEventListener("resize", () => {
+  if ($("palco").hidden) return;
+  medirUI();
+  const duas = prefs.colunas !== "nao" && P.modo === "salto" && temPartes() && !P.gravando && corpo.clientWidth >= 900 && corpo.clientWidth > corpo.clientHeight;
+  if (duas !== !!P.duas){ const top = corpo.scrollTop; renderCifra(); corpo.scrollTop = top; P.setY = top; return; }
+  if (!P.fonte) aplicarFonte(); else calcularPassos();
+});
 
 /* ---------- Palco: capo, simplificar e desenho dos acordes ---------- */
 function atualizarCapo(soa, bemol){
@@ -2061,6 +2177,7 @@ function atualizarCapo(soa, bemol){
   const sug = soa ? sugestaoCapo(soa) : null;
   const atualFacil = sug && forma && partesAcorde(forma) && (/^m(?!aj)/.test(partesAcorde(forma).suf) ? FACEIS_MENOR : FACEIS_MAIOR).includes(partesAcorde(forma).idx);
   const b = $("p-capo-facil");
+  $("p-mais").classList.toggle("aviso", !!(sug && !atualFacil && sug.capo !== uso));
   if (sug && !atualFacil && sug.capo !== uso){ b.hidden = false; b.textContent = "Capo fácil: " + (sug.capo ? sug.capo + "ª → formas de " : "sem capo → ") + sug.forma; b.dataset.capo = sug.capo; }
   else b.hidden = true;
 }
@@ -2094,6 +2211,12 @@ function abrirPainelAcordes(){
   $("p-acordes").hidden = false;
 }
 $("p-acordes-btn").onclick = abrirPainelAcordes;
+// Botão "Mais": ferramentas menos usadas durante o show.
+$("p-mais").onclick = () => {
+  const abrir = $("p-mais-painel").hidden;
+  $("p-mais-painel").hidden = !abrir; $("p-mais").setAttribute("aria-expanded", abrir);
+  medirUI(); if (P.tocando) mostrarUI();
+};
 $("p-acordes-x").onclick = () => { $("p-acordes").hidden = true; };
 
 /* ---------- Contagem, pulso do metrônomo e som ---------- */
@@ -2263,17 +2386,160 @@ $("p-dica-ok").onclick = () => { $("p-dica").hidden = true; try { localStorage.s
 document.addEventListener("keydown", (e) => {
   if ($("palco").hidden) return;
   if (e.target.closest && e.target.closest("input,textarea")) return;
-  const k = e.key;
-  if (k === " " || k === "Enter" || k === "MediaPlayPause"){ e.preventDefault(); alternar(); }
-  else if (k === "PageDown" || k === "ArrowDown"){ e.preventDefault(); rolarTela(1); }
-  else if (k === "PageUp" || k === "ArrowUp"){ e.preventDefault(); rolarTela(-1); }
-  else if (k === "ArrowRight" || k === "MediaTrackNext"){ e.preventDefault(); $("p-proxima").hidden ? $("p-prox").click() : $("p-proxima-ir").click(); }
-  else if (k === "ArrowLeft" || k === "MediaTrackPrevious"){ e.preventDefault(); $("p-ant").click(); }
+  if (!$("pedido").hidden) return;
+  const k = e.key, acao = acaoDaTecla(k);
+  if (acao) e.preventDefault();
+  if (acao === "tocar") alternar();
+  else if (acao === "proximaParte") rolarTela(1);
+  else if (acao === "parteAnterior") rolarTela(-1);
+  else if (acao === "proximaMusica"){ $("p-proxima").hidden ? $("p-prox").click() : $("p-proxima-ir").click(); }
+  else if (acao === "musicaAnterior") $("p-ant").click();
+  else if (acao === "repetir") repetirParte();
+  else if (acao === "controles"){ palco.classList.contains("limpo") ? mostrarUI() : esconderUI(); }
   else if (k === "+" || k === "="){ ajustarVel(0.1); }
   else if (k === "-"){ ajustarVel(-0.1); }
-  else if (k === "r" || k === "R"){ repetirParte(); }
-  else if (k === "Escape"){ sairPalco(); }
+  else if (k === "Escape"){ $("p-acordes").hidden ? sairPalco() : ($("p-acordes").hidden = true); }
 });
+
+/* ---------- Noite de show: músicas tocadas, pedido do público e intervalo ---------- */
+let noite = { ids: [] };
+try { noite = JSON.parse(localStorage.getItem("cifra-noite") || '{"ids":[]}'); } catch {}
+function salvarNoite(){ try { localStorage.setItem("cifra-noite", JSON.stringify(noite)); } catch {} }
+function marcarTocada(id){ if (id && !noite.ids.includes(id)){ noite.ids.push(id); salvarNoite(); renderSetlist(); } }
+function primeiraNaoTocada(){ const i = estado.setlist.findIndex((id) => !noite.ids.includes(id)); return i < 0 ? 0 : i; }
+
+// Escolher uma música do repertório (pedido do público).
+let aoEscolherPedido = null;
+function abrirPedido(titulo, aoEscolher){
+  aoEscolherPedido = aoEscolher;
+  $("pedido-h").textContent = titulo;
+  $("pedido-busca").value = ""; renderPedido();
+  $("pedido").hidden = false; setTimeout(() => $("pedido-busca").focus(), 50);
+}
+function renderPedido(){
+  const q = $("pedido-busca").value.trim().toLowerCase(), ul = $("pedido-lista"); ul.textContent = "";
+  const lista = [...estado.musicas.values()].filter((m) => !q || (m.titulo + " " + (m.artista || "") + " " + (m.etiquetas || []).join(" ")).toLowerCase().includes(q))
+    .sort((a, b) => (a.titulo || "").localeCompare(b.titulo || "", "pt")).slice(0, 60);
+  for (const m of lista){
+    const li = document.createElement("li"); li.className = "song";
+    const b = document.createElement("button"); b.className = "song-main";
+    const t = document.createElement("div"); t.className = "song-title"; t.textContent = m.titulo;
+    b.append(t, metaLinha(m));
+    b.onclick = () => { $("pedido").hidden = true; aoEscolherPedido && aoEscolherPedido(m); };
+    li.append(b); ul.append(li);
+  }
+  if (!lista.length){ const li = document.createElement("li"); li.className = "empty"; li.textContent = "Nenhuma música com esse nome no repertório."; ul.append(li); }
+}
+$("pedido-busca").addEventListener("input", renderPedido);
+$("pedido-fechar").onclick = () => { $("pedido").hidden = true; };
+// No palco: entra como a próxima música.
+$("p-pedido").onclick = () => abrirPedido("Pedido do público", (m) => {
+  P.fila.splice(P.i + 1, 0, m.id);
+  const pos = estado.setlist.indexOf(P.m.id);
+  estado.setlist = estado.setlist.filter((x) => x !== m.id);
+  estado.setlist.splice(pos >= 0 ? estado.setlist.indexOf(P.m.id) + 1 : estado.setlist.length, 0, m.id);
+  store.salvarSetlist();
+  $("p-prox").disabled = false;
+  toast(m.titulo + " entra como a próxima");
+  if (P.acabou) mostrarProxima();
+});
+// No setlist: entra logo depois da última tocada.
+$("btn-pedido").onclick = () => abrirPedido("Pedido do público", (m) => {
+  estado.setlist = estado.setlist.filter((x) => x !== m.id);
+  estado.setlist.splice(primeiraNaoTocada(), 0, m.id);
+  store.salvarSetlist(); toast(m.titulo + " entra como a próxima do show");
+});
+$("btn-nova-noite").onclick = () => { noite = { ids: [] }; salvarNoite(); renderSetlist(); toast("Nova noite: nenhuma música marcada como tocada"); };
+
+// Intervalo com contagem regressiva.
+let intervaloT = null;
+function renderIntervalo(){
+  let fim = 0; try { fim = +localStorage.getItem("cifra-intervalo") || 0; } catch {}
+  const card = $("intervalo-card"), falta = Math.round((fim - Date.now()) / 1000);
+  clearInterval(intervaloT);
+  if (!fim){ card.hidden = true; return; }
+  card.hidden = false;
+  const atualizar = () => {
+    const f = Math.round((fim - Date.now()) / 1000);
+    if (f <= 0){ $("intervalo-tempo").textContent = "0:00"; $("intervalo-rot").textContent = "Fim do intervalo! Hora de voltar ao palco"; card.classList.add("fim"); clearInterval(intervaloT); try { navigator.vibrate && navigator.vibrate([300, 150, 300]); } catch {} return; }
+    card.classList.remove("fim"); $("intervalo-rot").textContent = "Intervalo · volta em"; $("intervalo-tempo").textContent = fmtTempo(f);
+  };
+  atualizar(); if (falta > 0) intervaloT = setInterval(atualizar, 1000);
+}
+for (const min of [10, 15, 20]) $("btn-int-" + min).onclick = () => { try { localStorage.setItem("cifra-intervalo", String(Date.now() + min * 60000)); } catch {} renderIntervalo(); };
+$("intervalo-fim").onclick = () => { try { localStorage.removeItem("cifra-intervalo"); } catch {} renderIntervalo(); };
+
+// Arrastar para mudar a ordem do setlist (toque, mouse ou setas do teclado na alça).
+function iniciarArrasto(e, li, i){
+  e.preventDefault();
+  const itens = [...$("setlist").querySelectorAll("li.song.set")];
+  const passo = li.getBoundingClientRect().height + 8, y0 = e.clientY;
+  let alvo = i;
+  li.classList.add("arrastando");
+  try { li.setPointerCapture(e.pointerId); } catch {}
+  const mover = (ev) => {
+    const dy = ev.clientY - y0;
+    li.style.transform = `translateY(${dy}px)`;
+    const novo = Math.max(0, Math.min(itens.length - 1, i + Math.round(dy / passo)));
+    if (novo === alvo) return;
+    alvo = novo;
+    itens.forEach((el, k) => {
+      if (el === li) return;
+      const d = (i < alvo && k > i && k <= alvo) ? -passo : (i > alvo && k < i && k >= alvo) ? passo : 0;
+      el.style.transform = d ? `translateY(${d}px)` : "";
+    });
+  };
+  const soltar = () => {
+    li.removeEventListener("pointermove", mover);
+    itens.forEach((el) => { el.style.transform = ""; }); li.classList.remove("arrastando");
+    if (alvo !== i){ const s = estado.setlist; const [x] = s.splice(i, 1); s.splice(alvo, 0, x); store.salvarSetlist(); }
+  };
+  li.addEventListener("pointermove", mover);
+  li.addEventListener("pointerup", soltar, { once: true });
+  li.addEventListener("pointercancel", soltar, { once: true });
+}
+
+/* ---------- Pedal e teclado configuráveis ---------- */
+const ACOES_PEDAL = [
+  { id: "tocar", nome: "Tocar / pausar", padrao: [" ", "Enter", "MediaPlayPause"] },
+  { id: "proximaParte", nome: "Próxima parte (ou rolar)", padrao: ["ArrowDown", "PageDown"] },
+  { id: "parteAnterior", nome: "Parte anterior (ou voltar)", padrao: ["ArrowUp", "PageUp"] },
+  { id: "proximaMusica", nome: "Próxima música", padrao: ["ArrowRight", "MediaTrackNext"] },
+  { id: "musicaAnterior", nome: "Música anterior", padrao: ["ArrowLeft", "MediaTrackPrevious"] },
+  { id: "repetir", nome: "Repetir a parte atual", padrao: ["r", "R"] },
+  { id: "controles", nome: "Mostrar / esconder controles", padrao: ["c", "C"] },
+];
+function teclasDe(acao){ const t = prefs.teclas && prefs.teclas[acao.id]; return Array.isArray(t) ? t : acao.padrao; }
+function nomeTecla(k){ return { " ": "Espaço", ArrowDown: "↓", ArrowUp: "↑", ArrowLeft: "←", ArrowRight: "→", PageDown: "PgDn", PageUp: "PgUp", Enter: "Enter", MediaPlayPause: "Play/Pause", MediaTrackNext: "Faixa ▸", MediaTrackPrevious: "◂ Faixa", AudioVolumeUp: "Volume +", AudioVolumeDown: "Volume −" }[k] || (k.length === 1 ? k.toUpperCase() : k); }
+function acaoDaTecla(k){ for (const a of ACOES_PEDAL) if (teclasDe(a).includes(k)) return a.id; return null; }
+let definindoTecla = null;
+function renderPedal(){
+  const box = $("pref-pedal"); box.textContent = "";
+  for (const a of ACOES_PEDAL){
+    const row = document.createElement("div"); row.className = "pedal-row";
+    const n = document.createElement("span"); n.className = "pedal-acao"; n.textContent = a.nome;
+    const ks = document.createElement("span"); ks.className = "pedal-teclas";
+    for (const nome of [...new Set(teclasDe(a).map(nomeTecla))]){ const kb = document.createElement("kbd"); kb.textContent = nome; ks.append(kb); }
+    const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.textContent = definindoTecla === a.id ? "Aperte o botão do pedal…" : "Definir";
+    if (definindoTecla === a.id) b.classList.add("primary");
+    b.onclick = () => { definindoTecla = definindoTecla === a.id ? null : a.id; renderPedal(); };
+    row.append(n, ks, b); box.append(row);
+  }
+}
+document.addEventListener("keydown", (e) => {
+  if (!definindoTecla || $("conta").hidden) return;
+  e.preventDefault(); e.stopPropagation();
+  if (e.key === "Escape"){ definindoTecla = null; renderPedal(); return; }
+  const teclas = {};
+  for (const a of ACOES_PEDAL) teclas[a.id] = teclasDe(a).filter((k) => k !== e.key && k.toLowerCase() !== e.key.toLowerCase());
+  const extra = e.key.length === 1 ? [e.key.toLowerCase(), e.key.toUpperCase()] : [e.key];
+  teclas[definindoTecla] = [...new Set([...extra])];
+  const nomeAcao = ACOES_PEDAL.find((a) => a.id === definindoTecla).nome;
+  definindoTecla = null;
+  definirPref("teclas", teclas); renderPedal();
+  toast("“" + nomeAcao + "” agora no botão " + nomeTecla(e.key));
+}, true);
+$("pedal-padrao").onclick = () => { definirPref("teclas", null); definindoTecla = null; renderPedal(); toast("Pedal e teclado voltaram ao padrão"); };
 
 /* ---------- Preferências do app ---------- */
 const CORES = [
@@ -2325,6 +2591,8 @@ function renderPrefs(){
   }
   botoesEscolha($("pref-modo"), [{ id: "salto", nome: "Saltar" }, { id: "corrido", nome: "Corrido" }], prefs.modo, (v) => definirPref("modo", v));
   botoesEscolha($("pref-letra"), LETRAS, prefs.letra, (v) => definirPref("letra", v));
+  botoesEscolha($("pref-colunas"), [{ id: "auto", nome: "Automático" }, { id: "nao", nome: "Desligado" }], prefs.colunas || "auto", (v) => definirPref("colunas", v));
+  renderPedal();
   botoesEscolha($("pref-trans"), [{ id: "manual", nome: "Espera eu tocar" }, { id: "auto10", nome: "Começa a próxima em 10 s" }, { id: "auto30", nome: "Em 30 s" }], prefs.transicao || "manual", (v) => definirPref("transicao", v));
   botoesEscolha($("pref-som"), [{ id: "nao", nome: "Desligado" }, { id: "sim", nome: "Ligado" }], prefs.somContagem || "nao", (v) => definirPref("somContagem", v));
   botoesEscolha($("pref-pulso"), [{ id: "sim", nome: "Ligado" }, { id: "nao", nome: "Desligado" }], prefs.pulso || "sim", (v) => definirPref("pulso", v));
@@ -2555,7 +2823,7 @@ const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platfo
 let dicaVista = false; try { dicaVista = localStorage.getItem("dica-ios") === "1"; } catch {}
 if (ehIOS && !instalado && !dicaVista && !dentroDeFrame) $("ios-dica").hidden = false;
 $("ios-fechar").onclick = () => { $("ios-dica").hidden = true; try { localStorage.setItem("dica-ios", "1"); } catch {} };
-const VERSAO_APP = "v12 · acordes";
+const VERSAO_APP = "v13 · setlist";
 if ("serviceWorker" in navigator && location.protocol === "https:" && !dentroDeFrame) {
   const tinhaControle = !!navigator.serviceWorker.controller;
   let recarregou = false;
@@ -2580,6 +2848,7 @@ renderTudo();
 store.iniciar();
 iniciarSample();
 receberCompartilhado();
+renderIntervalo();
 })();
 </script>
 
