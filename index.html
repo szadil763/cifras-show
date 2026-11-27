@@ -152,8 +152,13 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* Modo palco */
-.stage{position:fixed;inset:0;z-index:30;background:#0b0e13;display:flex;flex-direction:column}
-.stage-top{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 8px) max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line);background:#0b0e13}
+.stage{position:fixed;inset:0;z-index:30;background:#0b0e13;overflow:hidden;--ui-top:150px}
+.stage-ui{position:absolute;left:0;right:0;z-index:3;background:color-mix(in srgb,#0b0e13 94%,transparent);transition:opacity .25s ease,transform .25s ease}
+.stage-ui-top{top:0;border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.stage-ui-bottom{bottom:0;border-top:1px solid var(--line)}
+.stage.limpo .stage-ui-top{opacity:0;transform:translateY(-100%);pointer-events:none}
+.stage.limpo .stage-ui-bottom{opacity:0;transform:translateY(100%);pointer-events:none}
+.stage-top{display:flex;align-items:center;gap:8px;padding:8px max(12px,env(safe-area-inset-right,0px)) 4px max(12px,env(safe-area-inset-left,0px))}
 .stage-title{flex:1;min-width:0}
 .stage-title b{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stage-title small{color:var(--muted);font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -162,17 +167,30 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 .pill button:hover{background:var(--surface-2)}
 .pill span{font-family:var(--font-mono);font-weight:700;min-width:38px;text-align:center;font-size:13px}
 .pill .k{color:var(--chord)}
-.stage-tools{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.progress{height:4px;background:var(--surface-2)}
+.stage-tools{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:4px max(12px,env(safe-area-inset-right,0px)) 6px max(12px,env(safe-area-inset-left,0px))}
+.stage-tools::-webkit-scrollbar{display:none}
+.stage-tools>*{flex:none}
+.progress{position:absolute;left:0;right:0;top:env(safe-area-inset-top,0px);z-index:4;height:4px;background:var(--surface-2)}
+.hud{position:absolute;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 10px);z-index:2;display:flex;gap:10px;font-family:var(--font-mono);font-size:12px;color:var(--muted);background:color-mix(in srgb,#0b0e13 80%,transparent);padding:3px 10px;border-radius:999px;opacity:0;transition:opacity .3s;pointer-events:none}
+.stage.limpo .hud{opacity:.85}
+.hud #p-hud-parte{color:var(--accent);font-family:var(--font-body);font-weight:700}
+.cadeado{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:max(12px,env(safe-area-inset-right,0px));z-index:6;display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;color:var(--muted);pointer-events:none}
+.cadeado svg{width:16px;height:16px;color:var(--accent)}
+.stage.travado .stage-ui{opacity:0;pointer-events:none}
+.dica-toque{position:absolute;inset:0;z-index:8;display:grid;grid-template-rows:3fr 4fr 3fr auto;background:rgba(5,7,10,.86);padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
+.dica-toque .zona{display:grid;place-items:center;text-align:center;border:2px dashed var(--line);border-radius:14px;margin:4px 0;color:var(--muted);font-size:15px}
+.dica-toque .zona b{color:var(--fg);font-size:18px}
+.dica-toque .z2{border-color:var(--accent)}
+.dica-toque .btn{justify-self:center;margin-top:10px;min-width:160px}
 .progress i{display:block;height:100%;background:var(--accent);width:0}
-.stage-body{flex:1;overflow:auto;padding:18px max(16px,env(safe-area-inset-left,0px)) 0 max(16px,env(safe-area-inset-right,0px));overscroll-behavior:contain}
-.sheet-music{font-family:var(--font-mono);white-space:pre;line-height:1.35;padding-bottom:70vh}
+.stage-body{position:absolute;inset:0;overflow:auto;padding:0 max(16px,env(safe-area-inset-left,0px)) 0 max(16px,env(safe-area-inset-right,0px));overscroll-behavior:contain;-webkit-user-select:none;user-select:none;touch-action:pan-y}
+.sheet-music{font-family:var(--font-mono);white-space:pre;line-height:1.35;padding-top:calc(var(--ui-top) + 8px);padding-bottom:70vh}
 .sheet-music .l{min-height:1.35em}
 .sheet-music .c{color:var(--chord);font-weight:700}
 .sheet-music .s{font-family:var(--font-body);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.72em;color:#0b0e13;background:var(--muted);display:inline-block;padding:1px 8px;border-radius:4px;margin:.5em 0 .2em}
 .sheet-music .t{color:var(--muted)}
 .sheet-music .end{font-family:var(--font-body);color:var(--muted);font-size:.6em;margin-top:2em;text-transform:uppercase;letter-spacing:.1em}
-.stage-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 10px) max(12px,env(safe-area-inset-left,0px));border-top:1px solid var(--line);background:#0b0e13}
+.stage-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 10px) max(12px,env(safe-area-inset-left,0px))}
 .clock{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:14px;color:var(--muted);min-width:94px}
 .clock b{color:var(--fg)}
 .transport{display:flex;align-items:center;gap:8px}
@@ -182,19 +200,20 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 .round svg{width:22px;height:22px}
 .speed{display:flex;flex-direction:column;align-items:center;font-size:11px;color:var(--muted);min-width:94px;text-align:right}
 .speed b{font-family:var(--font-mono);font-size:15px;color:var(--fg)}
-.countdown{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;font-family:var(--font-display);font-weight:800;font-size:28vmin;color:color-mix(in srgb,var(--accent) 80%,transparent)}
-.next-card{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:14px 16px;display:flex;gap:12px;align-items:center;width:min(92vw,420px)}
+.countdown{position:absolute;z-index:4;inset:0;display:grid;place-items:center;pointer-events:none;font-family:var(--font-display);font-weight:800;font-size:28vmin;color:color-mix(in srgb,var(--accent) 80%,transparent)}
+.next-card{position:absolute;z-index:5;left:50%;bottom:110px;transform:translateX(-50%);background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:14px 16px;display:flex;gap:12px;align-items:center;width:min(92vw,420px)}
 .next-card div{flex:1;min-width:0}
 .next-card small{color:var(--muted);display:block;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
 .next-card b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mapa{display:flex;gap:6px;overflow-x:auto;padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line);background:#0b0e13;scrollbar-width:none}
+.mapa{display:flex;gap:6px;overflow-x:auto;padding:2px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));scrollbar-width:none}
 .mapa::-webkit-scrollbar{display:none}
 .chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
 .chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .chip.feito{color:color-mix(in srgb,var(--muted) 60%,transparent)}
 .bloco{padding-top:.15em;transition:opacity .3s}
 .bloco.agora .s{background:var(--accent)}
-.salto{position:absolute;left:50%;bottom:112px;transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:18px;padding:10px 18px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.45);white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.stage.limpo .salto,.stage.limpo .next-card{bottom:calc(env(safe-area-inset-bottom,0px) + 40px)}
+.salto{position:absolute;z-index:5;left:50%;bottom:112px;transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:18px;padding:10px 18px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.45);white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
 .bloco .s small{font-weight:600;opacity:.75;margin-left:.4em;letter-spacing:.04em}
 .bloco.extra .s{background:var(--accent)}
 .sheet-music .rep{font-family:var(--font-body);font-size:.62em;color:var(--accent);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:.3em 0}
@@ -214,13 +233,12 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 .keys{font-size:12px;color:var(--muted);padding:6px 12px;text-align:center;border-top:1px solid var(--line);background:#0b0e13}
 .keys kbd{font-family:var(--font-mono);border:1px solid var(--line);border-radius:4px;padding:0 4px;font-size:11px}
 
+#palco:not([hidden]) ~ .toast{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 16px)}
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;z-index:50;font-size:14px;max-width:90vw}
 
 @media (max-width:520px){
   .row{grid-template-columns:1fr 1fr}
   .row .wide{grid-column:1/-1}
-  .stage-top{flex-wrap:wrap}
-  .stage-tools{width:100%;justify-content:space-between}
   .clock,.speed{min-width:0}
   .clock{font-size:12px;white-space:nowrap}
   .stage-bottom{gap:4px}
@@ -450,37 +468,49 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 
 <!-- Palco -->
 <div class="stage" id="palco" hidden>
-  <div class="stage-top">
-    <button class="round" id="p-sair" aria-label="Sair do palco"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <div class="stage-title"><b id="p-titulo"></b><small id="p-sub"></small></div>
+  <div class="progress"><i id="p-prog"></i></div>
+  <div class="stage-body" id="p-corpo"><div class="sheet-music" id="p-cifra"></div></div>
+  <div class="hud" id="p-hud" aria-hidden="true"><span id="p-hud-parte"></span><span id="p-hud-tempo"></span></div>
+  <div class="stage-ui stage-ui-top" id="p-ui-top">
+    <div class="stage-top">
+      <button class="round" id="p-sair" aria-label="Sair do palco"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <div class="stage-title"><b id="p-titulo"></b><small id="p-sub"></small></div>
+    </div>
     <div class="stage-tools">
       <div class="pill" title="Mudar o tom"><button id="p-tom-menos" aria-label="Meio tom abaixo">−</button><span class="k" id="p-tom">G</span><button id="p-tom-mais" aria-label="Meio tom acima">+</button></div>
       <div class="pill" title="Tamanho da letra"><button id="p-fonte-menos" aria-label="Diminuir letra">A−</button><button id="p-fonte-mais" aria-label="Aumentar letra">A+</button></div>
       <button class="btn-rep" id="p-repetir" title="Toca a parte atual mais uma vez (tecla R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></svg><span id="p-repetir-txt">Repetir parte</span></button>
       <button class="btn-rep" id="p-modo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 20V4M3 8l4-4 4 4M17 4v16M13 16l4 4 4-4"/></svg><span id="p-modo-txt">Saltar</span></button>
+      <button class="btn-rep" id="p-trava" title="Trava a tela contra toques sem querer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Travar</span></button>
     </div>
+    <nav class="mapa" id="p-mapa" aria-label="Partes da música"></nav>
   </div>
-  <nav class="mapa" id="p-mapa" aria-label="Partes da música"></nav>
-  <div class="progress"><i id="p-prog"></i></div>
-  <div class="stage-body" id="p-corpo"><div class="sheet-music" id="p-cifra"></div></div>
   <div class="countdown" id="p-contagem" hidden></div>
   <div class="salto" id="p-salto" hidden role="status"></div>
   <div class="next-card" id="p-proxima" hidden>
     <div><small>Próxima do setlist</small><b id="p-proxima-nome"></b></div>
     <button class="btn primary" id="p-proxima-ir">Tocar</button>
   </div>
-  <div class="stage-bottom">
-    <div class="clock"><b id="p-tempo">0:00</b> / <span id="p-total">0:00</span></div>
-    <div class="transport">
-      <button class="round" id="p-ant" aria-label="Música anterior"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
-      <button class="round" id="p-lento" aria-label="Rolar mais devagar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 12h12"/></svg></button>
-      <button class="play" id="p-play" aria-label="Tocar"></button>
-      <button class="round" id="p-rapido" aria-label="Rolar mais rápido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 12h12M12 6v12"/></svg></button>
-      <button class="round" id="p-prox" aria-label="Próxima música"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
-    </div>
-    <div class="speed">velocidade<b id="p-vel">100%</b></div>
+  <div class="cadeado" id="p-cadeado" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span id="p-cadeado-txt">Tela travada · segure para destravar</span></div>
+  <div class="dica-toque" id="p-dica" hidden>
+    <div class="zona z1">Toque aqui<br><b>volta uma parte</b></div>
+    <div class="zona z2">Toque no meio<br><b>mostra os controles</b></div>
+    <div class="zona z3">Toque aqui<br><b>avança uma parte</b></div>
+    <button class="btn primary" id="p-dica-ok">Entendi</button>
   </div>
-  <div class="keys">Teclado ou pedal: <kbd>Espaço</kbd> tocar/pausar · <kbd>↓</kbd><kbd>PgDn</kbd> avançar · <kbd>↑</kbd><kbd>PgUp</kbd> voltar · <kbd>→</kbd> próxima · <kbd>←</kbd> anterior · <kbd>R</kbd> repetir parte · no modo Saltar, <kbd>↓</kbd><kbd>↑</kbd> vão para a próxima/anterior parte</div>
+  <div class="stage-ui stage-ui-bottom" id="p-ui-bottom">
+    <div class="stage-bottom">
+      <div class="clock"><b id="p-tempo">0:00</b> / <span id="p-total">0:00</span></div>
+      <div class="transport">
+        <button class="round" id="p-ant" aria-label="Música anterior"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+        <button class="round" id="p-lento" aria-label="Rolar mais devagar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 12h12"/></svg></button>
+        <button class="play" id="p-play" aria-label="Tocar"></button>
+        <button class="round" id="p-rapido" aria-label="Rolar mais rápido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 12h12M12 6v12"/></svg></button>
+        <button class="round" id="p-prox" aria-label="Próxima música"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+      </div>
+      <div class="speed">velocidade<b id="p-vel">100%</b></div>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast" hidden></div>
@@ -1376,6 +1406,7 @@ function renderCifra(){
   if (P.modo !== "salto" || !temPartes()){ const fim = document.createElement("div"); fim.className = "end"; fim.textContent = "fim"; el.append(fim); }
   $("p-tom").textContent = transporTom(m.tom, P.transp) || (P.transp ? (P.transp > 0 ? "+" : "") + P.transp : "tom");
   renderMapa();
+  medirUI();
   aplicarFonte();
 }
 function renderMapa(){
@@ -1481,7 +1512,9 @@ function ressincronizar(){
 function fonteAuto(){
   const maior = Math.max(20, ...(P.m.texto || "").split("\n").map((l) => l.replace(/\s+$/,"").length));
   const larg = corpo.clientWidth - 32;
-  return Math.max(13, Math.min(34, Math.floor(larg / (maior * 0.64))));
+  // Cabe a linha mais longa na largura e pelo menos ~11 linhas na altura (celular deitado).
+  const porAltura = Math.floor(corpo.clientHeight / (11 * 1.35));
+  return Math.max(13, Math.min(34, Math.floor(larg / (maior * 0.64)), porAltura));
 }
 function aplicarFonte(){
   $("p-cifra").style.fontSize = (P.fonte || Math.round(fonteAuto() * escalaLetra())) + "px";
@@ -1508,6 +1541,9 @@ function atualizarRelogio(){
   $("p-total").textContent = dur ? fmtTempo(dur) : "—";
   $("p-prog").style.width = Math.min(100, Math.max(0, prog)) + "%";
   $("p-vel").textContent = Math.round(P.vel * 100) + "%";
+  $("p-hud-tempo").textContent = fmtTempo(P.decorrido) + (dur ? " / " + fmtTempo(dur) : "");
+  const parte = temPartes() ? P.est.defs.get(P.seq[parteAtual()]?.key)?.nome : "";
+  $("p-hud-parte").textContent = parte || "";
 }
 function avisoSalto(){
   const aviso = $("p-salto");
@@ -1558,6 +1594,11 @@ function loop(t){
   if (P.intro > 0){
     P.intro -= dt; const c = $("p-contagem");
     if (P.intro > 0){ c.hidden = false; c.textContent = Math.ceil(P.intro); } else c.hidden = true;
+    // Na contagem, sobe a cifra até o topo (o espaço da barra de controles não é mais necessário).
+    if (P.passo === 0 && P.tPasso === 0 && palco.classList.contains("limpo")){
+      const alvo = P.modo === "salto" && temPartes() && P.passos[0] ? P.passos[0].start : Math.max(0, $("p-ui-top").offsetHeight - 12);
+      if (corpo.scrollTop < alvo - 1){ corpo.scrollTop += Math.max(1, (alvo - corpo.scrollTop) * Math.min(1, dt * 5)); P.setY = corpo.scrollTop; P.pos = corpo.scrollTop; }
+    }
   } else if (P.modo === "salto" && temPartes()) passoSalto(dt);
   else passoCorrido(dt);
   avisoSalto();
@@ -1574,8 +1615,8 @@ function setTocando(v){
   P.tocando = v;
   $("p-play").innerHTML = v ? ICON_PAUSE : ICON_PLAY;
   $("p-play").setAttribute("aria-label", v ? "Pausar" : "Tocar");
-  if (v){ $("p-proxima").hidden = true; pedirTelaLigada(); P.setY = corpo.scrollTop; if (P.modo === "salto" && temPartes() && !P.passos.length) calcularPassos(); }
-  else { $("p-contagem").hidden = true; $("p-salto").hidden = true; }
+  if (v){ $("p-proxima").hidden = true; pedirTelaLigada(); P.setY = corpo.scrollTop; if (P.modo === "salto" && temPartes() && !P.passos.length) calcularPassos(); mostrarUI(900); }
+  else { $("p-contagem").hidden = true; $("p-salto").hidden = true; if (!P.travado) mostrarUI(); }
 }
 async function pedirTelaLigada(){
   try { if ("wakeLock" in navigator && !P.wake) { P.wake = await navigator.wakeLock.request("screen"); P.wake.addEventListener?.("release", () => { P.wake = null; }); } } catch {}
@@ -1608,7 +1649,10 @@ function carregarNoPalco(i){
 function abrirPalco(fila, i, voltarEditor = false){
   P.fila = fila; P.voltarEditor = voltarEditor; P.m = null;
   $("palco").hidden = false;
+  medirUI();
   carregarNoPalco(i);
+  let viu = false; try { viu = localStorage.getItem("dica-palco") === "1"; } catch {}
+  $("p-dica").hidden = viu;
   if (!P.raf) P.raf = requestAnimationFrame(loop);
   pedirTelaLigada();
 }
@@ -1620,6 +1664,7 @@ function salvarAjustesPalco(){
   P.alterado = false;
 }
 function sairPalco(){
+  if (P.travado) destravar(true);
   setTocando(false); salvarAjustesPalco();
   cancelAnimationFrame(P.raf); P.raf = 0;
   try { P.wake?.release(); } catch {} P.wake = null;
@@ -1670,7 +1715,59 @@ $("p-tom-menos").onclick = () => { P.transp = (P.transp - 1) % 12; P.alterado = 
 $("p-tom-mais").onclick = () => { P.transp = (P.transp + 1) % 12; P.alterado = true; renderCifra(); };
 $("p-fonte-menos").onclick = () => { P.fonte = Math.max(12, (P.fonte || fonteAuto()) - 2); P.alterado = true; aplicarFonte(); };
 $("p-fonte-mais").onclick = () => { P.fonte = Math.min(60, (P.fonte || fonteAuto()) + 2); P.alterado = true; aplicarFonte(); };
-window.addEventListener("resize", () => { if ($("palco").hidden) return; if (!P.fonte) aplicarFonte(); else calcularPassos(); });
+window.addEventListener("resize", () => { if ($("palco").hidden) return; medirUI(); if (!P.fonte) aplicarFonte(); else calcularPassos(); });
+
+/* ---------- Modo show: controles que somem, zonas de toque e trava ---------- */
+const palco = $("palco");
+let uiTimer = null;
+// A cifra começa abaixo da barra de cima; a barra flutua por cima e some durante a música.
+function medirUI(){ palco.style.setProperty("--ui-top", $("p-ui-top").offsetHeight + "px"); }
+function mostrarUI(tempo){
+  if (P.travado) return;
+  palco.classList.remove("limpo"); clearTimeout(uiTimer);
+  if (P.tocando) uiTimer = setTimeout(() => { if (P.tocando && !P.travado) palco.classList.add("limpo"); }, tempo || 3500);
+}
+function esconderUI(){ clearTimeout(uiTimer); palco.classList.add("limpo"); }
+// Mexer nos controles mantém eles na tela.
+for (const id of ["p-ui-top", "p-ui-bottom"]) $(id).addEventListener("pointerdown", () => { if (P.tocando) mostrarUI(); });
+
+// Zonas de toque: em cima volta uma parte, embaixo avança, no meio mostra/esconde os controles.
+let toque = null, destravaT = null;
+const TEXTO_CADEADO = "Tela travada · segure para destravar";
+corpo.addEventListener("pointerdown", (e) => {
+  toque = { x: e.clientX, y: e.clientY, t: Date.now(), scroll: corpo.scrollTop };
+  if (P.travado){
+    $("p-cadeado-txt").textContent = "Continue segurando…";
+    clearTimeout(destravaT); destravaT = setTimeout(() => { toque = null; destravar(); }, 900);
+  }
+});
+function soltarToque(){ clearTimeout(destravaT); if (P.travado) $("p-cadeado-txt").textContent = TEXTO_CADEADO; }
+corpo.addEventListener("pointercancel", () => { toque = null; soltarToque(); });
+corpo.addEventListener("pointerup", (e) => {
+  soltarToque();
+  const t = toque; toque = null;
+  if (!t || P.travado) return;
+  const moveu = Math.abs(e.clientX - t.x) > 12 || Math.abs(e.clientY - t.y) > 12 || Math.abs(corpo.scrollTop - t.scroll) > 6;
+  if (moveu || Date.now() - t.t > 600) return;
+  const r = corpo.getBoundingClientRect(), f = (e.clientY - r.top) / r.height;
+  if (f < 0.3) rolarTela(-1);
+  else if (f > 0.7) rolarTela(1);
+  else if (palco.classList.contains("limpo")) mostrarUI();
+  else esconderUI();
+});
+function travar(){
+  P.travado = true; clearTimeout(uiTimer);
+  palco.classList.add("travado", "limpo");
+  $("p-cadeado").hidden = false; $("p-cadeado-txt").textContent = TEXTO_CADEADO;
+  toast("Tela travada. O pedal continua funcionando. Para destravar, segure a tela por 1 segundo.");
+}
+function destravar(silencioso){
+  P.travado = false; palco.classList.remove("travado"); $("p-cadeado").hidden = true;
+  mostrarUI();
+  if (!silencioso) toast("Tela destravada");
+}
+$("p-trava").onclick = travar;
+$("p-dica-ok").onclick = () => { $("p-dica").hidden = true; try { localStorage.setItem("dica-palco", "1"); } catch {} };
 
 // Pedal Bluetooth de virar página funciona como teclado
 document.addEventListener("keydown", (e) => {
@@ -1965,7 +2062,7 @@ const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platfo
 let dicaVista = false; try { dicaVista = localStorage.getItem("dica-ios") === "1"; } catch {}
 if (ehIOS && !instalado && !dicaVista && !dentroDeFrame) $("ios-dica").hidden = false;
 $("ios-fechar").onclick = () => { $("ios-dica").hidden = true; try { localStorage.setItem("dica-ios", "1"); } catch {} };
-const VERSAO_APP = "v8 · compartilhar";
+const VERSAO_APP = "v9 · modo show";
 if ("serviceWorker" in navigator && location.protocol === "https:" && !dentroDeFrame) {
   const tinhaControle = !!navigator.serviceWorker.controller;
   let recarregou = false;
