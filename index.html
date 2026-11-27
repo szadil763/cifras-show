@@ -168,6 +168,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 .pill button:hover{background:var(--surface-2)}
 .pill span{font-family:var(--font-mono);font-weight:700;min-width:38px;text-align:center;font-size:13px}
 .pill .k{color:var(--chord)}
+.p-nota{margin:0 max(12px,env(safe-area-inset-right,0px)) 2px max(12px,env(safe-area-inset-left,0px));font-size:13px;color:var(--accent);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stage-tools{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:4px max(12px,env(safe-area-inset-right,0px)) 6px max(12px,env(safe-area-inset-left,0px))}
 .stage-tools::-webkit-scrollbar{display:none}
 .stage-tools>*{flex:none}
@@ -217,7 +218,10 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 @media (prefers-reduced-motion:reduce){.pulso.on,.countdown.bate,.grav .rec{animation:none}.pulso.on{opacity:1}}
 .countdown{position:absolute;z-index:4;inset:0;display:grid;place-items:center;pointer-events:none;font-family:var(--font-display);font-weight:800;font-size:28vmin;color:color-mix(in srgb,var(--accent) 80%,transparent)}
 .next-card{position:absolute;z-index:5;left:50%;bottom:110px;transform:translateX(-50%);background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:14px 16px;display:flex;gap:12px;align-items:center;width:min(92vw,420px)}
-.next-card div{flex:1;min-width:0}
+.next-card .nc-info{flex:1;min-width:0;display:grid;gap:2px}
+.next-card .nc-acoes{display:flex;flex-direction:column;gap:6px}
+.nc-det{font-size:13px;color:var(--muted);font-family:var(--font-mono)}
+.nc-nota{font-size:13px;color:var(--accent);font-weight:600}
 .next-card small{color:var(--muted);display:block;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
 .next-card b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mapa{display:flex;gap:6px;overflow-x:auto;padding:2px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));scrollbar-width:none}
@@ -244,6 +248,9 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 .rchip button:hover{background:var(--surface-2);color:var(--fg)}
 .radd{border:1px dashed var(--line);background:none;border-radius:999px;padding:4px 10px;font-size:13px;color:var(--fg)}
 .radd:hover{border-color:var(--accent)}
+.sugestoes{display:flex;flex-wrap:wrap;gap:6px;margin-top:-6px}
+.sugestoes:empty{display:none}
+.sugestoes button{border:1px dashed var(--line);background:none;border-radius:999px;padding:3px 10px;font-size:12px;color:var(--muted)}
 .tempos-info{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:13px}
 .tempos-info:empty{display:none}
 .linkbtn{background:none;border:0;color:var(--accent);font-weight:600;font-size:13px;padding:4px}
@@ -354,6 +361,14 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
           <select id="f-compasso"><option value="4">4 tempos</option><option value="3">3 tempos (valsa)</option><option value="2">2 tempos</option><option value="6">6 tempos</option></select>
         </label>
       </div>
+      <div class="row">
+        <label>Capotraste
+          <select id="f-capo"><option value="0">Sem capo</option><option value="1">1ª casa</option><option value="2">2ª casa</option><option value="3">3ª casa</option><option value="4">4ª casa</option><option value="5">5ª casa</option><option value="6">6ª casa</option><option value="7">7ª casa</option></select>
+        </label>
+        <label class="wide">Anotação para o palco<input type="text" id="f-nota" maxlength="160" placeholder="Ex.: começa só voz; pedir palmas no refrão"></label>
+      </div>
+      <label>Etiquetas (separe por vírgula)<input type="text" id="f-etiquetas" maxlength="160" placeholder="Ex.: romântica, sertanejo, animada"></label>
+      <div class="sugestoes" id="f-etiq-sug"></div>
       <p class="hint" id="crono-hint" style="margin:-4px 0 0">A cifra rola do começo ao fim no tempo da duração. A introdução é o tempo que a tela espera parada antes de rolar.</p>
       <label>Cifra (acordes em cima da letra)
         <textarea id="f-texto" spellcheck="false" placeholder="[Intro]&#10;G  D  Em  C&#10;&#10;G                D&#10;Escreva a letra aqui com os acordes em cima"></textarea>
@@ -487,6 +502,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
       <div class="campo"><span>Rolagem no palco</span><div class="opcoes" id="pref-modo"></div>
         <p class="hint" style="margin:0">Saltar: cada parte aparece uma vez e a tela vai até o refrão quando ele volta. Corrido: as repetições aparecem escritas em sequência.</p></div>
       <div class="campo"><span>Tamanho da letra no palco</span><div class="opcoes" id="pref-letra"></div></div>
+      <div class="campo"><span>Ao terminar uma música do setlist</span><div class="opcoes" id="pref-trans"></div></div>
       <div class="campo"><span>Som na contagem antes de rolar</span><div class="opcoes" id="pref-som"></div></div>
       <div class="campo"><span>Pulso do metrônomo na tela (músicas com BPM)</span><div class="opcoes" id="pref-pulso"></div></div>
       <label>Espera antes de rolar, em músicas novas (segundos)<input type="text" id="pref-intro" inputmode="numeric" placeholder="0"></label>
@@ -504,6 +520,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
       <button class="round" id="p-sair" aria-label="Sair do palco"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       <div class="stage-title"><b id="p-titulo"></b><small id="p-sub"></small></div>
     </div>
+    <p class="p-nota" id="p-nota" hidden></p>
     <div class="stage-tools">
       <div class="pill" title="Mudar o tom"><button id="p-tom-menos" aria-label="Meio tom abaixo">−</button><span class="k" id="p-tom">G</span><button id="p-tom-mais" aria-label="Meio tom acima">+</button></div>
       <div class="pill" title="Tamanho da letra"><button id="p-fonte-menos" aria-label="Diminuir letra">A−</button><button id="p-fonte-mais" aria-label="Aumentar letra">A+</button></div>
@@ -524,8 +541,8 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
   </div>
   <div class="salto" id="p-salto" hidden role="status"></div>
   <div class="next-card" id="p-proxima" hidden>
-    <div><small>Próxima do setlist</small><b id="p-proxima-nome"></b></div>
-    <button class="btn primary" id="p-proxima-ir">Tocar</button>
+    <div class="nc-info"><small id="p-proxima-rot">Próxima do setlist</small><b id="p-proxima-nome"></b><span class="nc-det" id="p-proxima-det"></span><span class="nc-nota" id="p-proxima-nota" hidden></span></div>
+    <div class="nc-acoes"><button class="btn primary" id="p-proxima-ir">Tocar</button><button class="btn ghost" id="p-proxima-espera" hidden>Esperar</button></div>
   </div>
   <div class="cadeado" id="p-cadeado" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span id="p-cadeado-txt">Tela travada · segure para destravar</span></div>
   <div class="dica-toque" id="p-dica" hidden>
@@ -1154,6 +1171,11 @@ function abrirEditor(id, pre){
   edTempos = d.tempos && Array.isArray(d.tempos.dur) ? d.tempos : null;
   $("f-bpm").value = d.bpm ? String(d.bpm) : "";
   $("f-compasso").value = String(d.compasso || 4);
+  $("f-capo").value = String(d.capo || 0);
+  $("f-nota").value = d.nota || "";
+  $("f-etiquetas").value = (d.etiquetas || []).join(", ");
+  renderSugestoesEtiquetas();
+  avisouDuracao = false;
   batidas = [];
   renderRoteiroEditor();
   $("ed-excluir").hidden = !m; excluirArmado = false; $("ed-excluir").textContent = "Excluir música";
@@ -1175,12 +1197,36 @@ function lerFormulario(){
     texto, roteiro: roteiroValido(analisarMusica(texto), edRoteiro), atualizada: Date.now(),
     bpm: Math.max(0, Math.min(300, parseInt($("f-bpm").value, 10) || 0)) || null,
     compasso: +$("f-compasso").value || 4,
+    capo: +$("f-capo").value || 0,
+    nota: $("f-nota").value.trim().slice(0, 160),
+    etiquetas: lerEtiquetas($("f-etiquetas").value),
     tempos: edTempos };
 }
 function fecharEditor(){ pararCrono(); $("editor").hidden = true; editando = null; }
 $("ed-fechar").onclick = fecharEditor;
+// Etiquetas: minúsculas, sem repetição; sugere as que já existem no repertório.
+function lerEtiquetas(txt){ return [...new Set(String(txt || "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean).map((x) => x.slice(0, 30)))].slice(0, 12); }
+function todasEtiquetas(){ const c = {}; for (const m of estado.musicas.values()) for (const e of (m.etiquetas || [])) c[e] = (c[e] || 0) + 1; return Object.keys(c).sort((a, b) => c[b] - c[a] || a.localeCompare(b, "pt")); }
+function renderSugestoesEtiquetas(){
+  const atuais = lerEtiquetas($("f-etiquetas").value), box = $("f-etiq-sug"); box.textContent = "";
+  const base = ["romântica", "animada", "sertanejo", "mpb", "pagode", "rock", "lenta", "dançante", "pedida"];
+  for (const e of [...new Set([...todasEtiquetas(), ...base])].filter((x) => !atuais.includes(x)).slice(0, 10)){
+    const b = document.createElement("button"); b.type = "button"; b.textContent = "+ " + e;
+    b.onclick = () => { $("f-etiquetas").value = [...atuais, e].join(", "); renderSugestoesEtiquetas(); };
+    box.append(b);
+  }
+}
+$("f-etiquetas").addEventListener("input", renderSugestoesEtiquetas);
+let avisouDuracao = false;
 $("ed-salvar").onclick = async () => {
   if (!$("f-texto").value.trim()){ toast("Escreva ou cole a cifra antes de salvar"); $("f-texto").focus(); return; }
+  if (!lerTempo($("f-duracao").value) && !edTempos && !avisouDuracao){
+    avisouDuracao = true;
+    const av = $("ed-aviso"); av.hidden = false;
+    av.textContent = "Esta música está sem duração: no palco ela vai rolar em 3:00. Use o relógio ao lado da duração para cronometrar, ou o “Ensinar tempo” no palco. Toque em Salvar de novo para salvar assim mesmo.";
+    $("editor").scrollTop = 0; $("f-duracao").focus();
+    return;
+  }
   const m = lerFormulario(); const nova = !editando;
   await store.salvarMusica(m); fecharEditor(); toast(nova ? "Música salva no repertório" : "Alterações salvas");
 };
@@ -1459,7 +1505,7 @@ function renderCifra(){
     chaves.forEach((key, n) => {
       const def = P.est.defs.get(key);
       const bloco = document.createElement("section"); bloco.className = "bloco"; bloco.dataset.key = key;
-      bloco.append(cabecalhoParte(def.nome, usos[key] > 1 ? "toca " + usos[key] + "×" : (usos[key] ? "" : "fora do roteiro")));
+      if (!(key === "inicio" && P.est.defs.size === 1)) bloco.append(cabecalhoParte(def.nome, usos[key] > 1 ? "toca " + usos[key] + "×" : (usos[key] ? "" : "fora do roteiro")));
       for (const l of expandirEstrofes(def.linhas)) bloco.append(linhaPalco(l, bemol));
       if (n < chaves.length - 1) bloco.append(Object.assign(document.createElement("div"), { className: "l" }));
       el.append(bloco);
@@ -1469,7 +1515,7 @@ function renderCifra(){
     P.seq.forEach((item, i) => {
       const bloco = document.createElement("section"); bloco.className = "bloco" + (item.extra ? " extra" : ""); bloco.dataset.i = i;
       const def = item.key ? P.est.defs.get(item.key) : { nome: "", linhas: (m.texto || "").split("\n") };
-      if (item.key){ vezes[item.key] = (vezes[item.key] || 0) + 1; bloco.append(cabecalhoParte(def.nome, vezes[item.key] > 1 ? vezes[item.key] + "ª vez" : "")); }
+      if (item.key && !(item.key === "inicio" && P.est.defs.size === 1)){ vezes[item.key] = (vezes[item.key] || 0) + 1; bloco.append(cabecalhoParte(def.nome, vezes[item.key] > 1 ? vezes[item.key] + "ª vez" : "")); }
       for (const l of expandirEstrofes(def.linhas)) bloco.append(linhaPalco(l, bemol));
       if (i < P.seq.length - 1) bloco.append(Object.assign(document.createElement("div"), { className: "l" }));
       el.append(bloco);
@@ -1704,9 +1750,31 @@ function loop(t){
 function terminou(){
   P.acabou = true;
   setTocando(false);
-  const prox = P.fila[P.i + 1] && estado.musicas.get(P.fila[P.i + 1]);
-  if (prox){ $("p-proxima-nome").textContent = prox.titulo; $("p-proxima").hidden = false; }
+  mostrarProxima();
 }
+// Cartão entre músicas: tom, capo, duração e anotação da próxima; pode começar sozinho.
+let transT = null;
+function pararTransicao(){ clearInterval(transT); transT = null; $("p-proxima-espera").hidden = true; }
+function mostrarProxima(){
+  pararTransicao();
+  const prox = P.fila[P.i + 1] && estado.musicas.get(P.fila[P.i + 1]);
+  if (!prox) return;
+  $("p-proxima-nome").textContent = prox.titulo;
+  const tom = transporTom(prox.tom, prox.transp || 0);
+  $("p-proxima-det").textContent = [tom ? "Tom " + tom : "", prox.capo ? "Capo " + prox.capo + "ª" : "", prox.duracao ? fmtTempo(prox.duracao) : ""].filter(Boolean).join(" · ");
+  $("p-proxima-nota").textContent = prox.nota || ""; $("p-proxima-nota").hidden = !prox.nota;
+  $("p-proxima-rot").textContent = "Próxima do setlist";
+  $("p-proxima").hidden = false;
+  const espera = { auto10: 10, auto30: 30 }[prefs.transicao] || 0;
+  if (espera){
+    let falta = espera;
+    $("p-proxima-espera").hidden = false;
+    const atual = () => { $("p-proxima-rot").textContent = "Próxima do setlist · começa em " + falta + " s"; };
+    atual();
+    transT = setInterval(() => { falta--; if (falta <= 0){ pararTransicao(); $("p-proxima-ir").click(); } else atual(); }, 1000);
+  }
+}
+$("p-proxima-espera").onclick = () => { pararTransicao(); $("p-proxima-rot").textContent = "Próxima do setlist"; };
 function setTocando(v){
   P.tocando = v;
   $("p-play").innerHTML = v ? ICON_PAUSE : ICON_PLAY;
@@ -1730,13 +1798,15 @@ function reiniciarMusica(){
   calcularPassos();
 }
 function carregarNoPalco(i){
+  pararTransicao();
   salvarAjustesPalco();
   P.i = i; P.m = estado.musicas.get(P.fila[i]);
   if (!P.m) return;
   P.vel = P.m.velocidade || 1; P.transp = P.m.transp || 0; P.fonte = P.m.fonte || 0; P.alterado = false;
   $("p-titulo").textContent = P.m.titulo;
   const pos = P.fila.length > 1 ? `${i+1} de ${P.fila.length} · ` : "";
-  $("p-sub").textContent = pos + (P.m.artista || "") + (P.m.tempos ? " · tempo ensinado" : P.m.duracao ? "" : " · sem duração: usando 3:00");
+  $("p-sub").textContent = [pos.replace(/ · $/, ""), P.m.artista || "", P.m.capo ? "Capo " + P.m.capo + "ª casa" : "", P.m.tempos ? "tempo ensinado" : P.m.duracao ? "" : "sem duração: usando 3:00"].filter(Boolean).join(" · ");
+  $("p-nota").textContent = P.m.nota || ""; $("p-nota").hidden = !P.m.nota;
   $("p-proxima").hidden = true;
   setTocando(false);
   reiniciarMusica();
@@ -1761,6 +1831,7 @@ function salvarAjustesPalco(){
   P.alterado = false;
 }
 function sairPalco(){
+  pararTransicao();
   if (P.travado) destravar(true);
   if (P.gravando) cancelarGravacao(true);
   setTocando(false); salvarAjustesPalco();
@@ -1811,7 +1882,7 @@ $("p-lento").onclick = () => ajustarVel(-0.1);
 $("p-rapido").onclick = () => ajustarVel(0.1);
 $("p-ant").onclick = () => { if (P.i > 0) carregarNoPalco(P.i - 1); };
 $("p-prox").onclick = () => { if (P.i < P.fila.length - 1) carregarNoPalco(P.i + 1); };
-$("p-proxima-ir").onclick = () => { carregarNoPalco(P.i + 1); alternar(); };
+$("p-proxima-ir").onclick = () => { pararTransicao(); carregarNoPalco(P.i + 1); alternar(); };
 $("p-tom-menos").onclick = () => { P.transp = (P.transp - 1) % 12; P.alterado = true; renderCifra(); };
 $("p-tom-mais").onclick = () => { P.transp = (P.transp + 1) % 12; P.alterado = true; renderCifra(); };
 $("p-fonte-menos").onclick = () => { P.fonte = Math.max(12, (P.fonte || fonteAuto()) - 2); P.alterado = true; aplicarFonte(); };
@@ -2045,6 +2116,7 @@ function renderPrefs(){
   }
   botoesEscolha($("pref-modo"), [{ id: "salto", nome: "Saltar" }, { id: "corrido", nome: "Corrido" }], prefs.modo, (v) => definirPref("modo", v));
   botoesEscolha($("pref-letra"), LETRAS, prefs.letra, (v) => definirPref("letra", v));
+  botoesEscolha($("pref-trans"), [{ id: "manual", nome: "Espera eu tocar" }, { id: "auto10", nome: "Começa a próxima em 10 s" }, { id: "auto30", nome: "Em 30 s" }], prefs.transicao || "manual", (v) => definirPref("transicao", v));
   botoesEscolha($("pref-som"), [{ id: "nao", nome: "Desligado" }, { id: "sim", nome: "Ligado" }], prefs.somContagem || "nao", (v) => definirPref("somContagem", v));
   botoesEscolha($("pref-pulso"), [{ id: "sim", nome: "Ligado" }, { id: "nao", nome: "Desligado" }], prefs.pulso || "sim", (v) => definirPref("pulso", v));
 }
@@ -2274,7 +2346,7 @@ const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platfo
 let dicaVista = false; try { dicaVista = localStorage.getItem("dica-ios") === "1"; } catch {}
 if (ehIOS && !instalado && !dicaVista && !dentroDeFrame) $("ios-dica").hidden = false;
 $("ios-fechar").onclick = () => { $("ios-dica").hidden = true; try { localStorage.setItem("dica-ios", "1"); } catch {} };
-const VERSAO_APP = "v10 · tempo";
+const VERSAO_APP = "v11 · transição";
 if ("serviceWorker" in navigator && location.protocol === "https:" && !dentroDeFrame) {
   const tinhaControle = !!navigator.serviceWorker.controller;
   let recarregou = false;
