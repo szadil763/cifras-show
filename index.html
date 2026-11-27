@@ -202,6 +202,27 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 .round svg{width:22px;height:22px}
 .speed{display:flex;flex-direction:column;align-items:center;font-size:11px;color:var(--muted);min-width:94px;text-align:right}
 .speed b{font-family:var(--font-mono);font-size:15px;color:var(--fg)}
+.sheet-music .ac{cursor:pointer;border-radius:4px}
+.sheet-music .ac:active{background:color-mix(in srgb,var(--accent) 25%,transparent)}
+.btn-rep[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+#p-capo{min-width:64px;font-family:var(--font-body)}
+#p-capo-facil{border-color:var(--ok);color:var(--ok)}
+.diag{width:120px;height:140px}
+.diag .dg-l{stroke:var(--muted);stroke-width:1.2}
+.diag .dg-pestana{stroke:var(--fg);stroke-width:5}
+.diag .dg-barra{stroke:var(--accent);stroke-width:11;stroke-linecap:round}
+.diag .dg-dedo{fill:var(--accent)}
+.diag .dg-solta{fill:none;stroke:var(--fg);stroke-width:1.6}
+.diag .dg-t{fill:var(--fg);font:600 13px var(--font-body)}
+.acorde-pop{position:absolute;z-index:9;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--surface);border:1px solid var(--accent);border-radius:16px;padding:12px 18px;display:grid;justify-items:center;gap:2px;box-shadow:0 10px 40px rgba(0,0,0,.6);pointer-events:none}
+.acorde-pop b{font-family:var(--font-mono);font-size:24px;color:var(--chord)}
+.acordes-painel{position:absolute;z-index:9;inset:0;background:rgba(8,10,14,.97);overflow:auto;padding:calc(env(safe-area-inset-top,0px) + 12px) max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.ap-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.ap-head b{font-family:var(--font-display);text-transform:uppercase;font-size:22px;letter-spacing:.03em}
+.ap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.ap-item{display:grid;justify-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 4px}
+.ap-item b{font-family:var(--font-mono);color:var(--chord);font-size:18px}
+.ap-item small{color:var(--muted);font-size:12px;padding:30px 6px;text-align:center}
 .pulso{position:absolute;z-index:5;top:calc(env(safe-area-inset-top,0px) + 12px);left:max(12px,env(safe-area-inset-left,0px));width:14px;height:14px;border-radius:50%;background:var(--accent);opacity:.18;pointer-events:none}
 .pulso.on{animation:pulso .18s ease-out}
 .pulso.um{background:var(--fg)}
@@ -524,6 +545,10 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
     <div class="stage-tools">
       <div class="pill" title="Mudar o tom"><button id="p-tom-menos" aria-label="Meio tom abaixo">−</button><span class="k" id="p-tom">G</span><button id="p-tom-mais" aria-label="Meio tom acima">+</button></div>
       <div class="pill" title="Tamanho da letra"><button id="p-fonte-menos" aria-label="Diminuir letra">A−</button><button id="p-fonte-mais" aria-label="Aumentar letra">A+</button></div>
+      <div class="pill" title="Capotraste: muda as formas dos acordes sem mudar o tom"><button id="p-capo-menos" aria-label="Capo uma casa abaixo">−</button><span id="p-capo">Capo 0</span><button id="p-capo-mais" aria-label="Capo uma casa acima">+</button></div>
+      <button class="btn-rep" id="p-capo-facil" hidden></button>
+      <button class="btn-rep" id="p-simplificar" aria-pressed="false" title="Troca acordes difíceis por versões básicas"><span>Simplificar</span></button>
+      <button class="btn-rep" id="p-acordes-btn" title="Desenho de todos os acordes da música"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M5 8h14M9.7 3v18M14.3 3v18"/></svg><span>Acordes</span></button>
       <button class="btn-rep" id="p-repetir" title="Toca a parte atual mais uma vez (tecla R)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></svg><span id="p-repetir-txt">Repetir parte</span></button>
       <button class="btn-rep" id="p-modo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 20V4M3 8l4-4 4 4M17 4v16M13 16l4 4 4-4"/></svg><span id="p-modo-txt">Saltar</span></button>
       <button class="btn-rep" id="p-ensinar" title="Toque a música uma vez marcando as mudanças de parte; a rolagem passa a seguir esse tempo"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="var(--live)"/></svg><span>Ensinar tempo</span></button>
@@ -532,6 +557,11 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
     <nav class="mapa" id="p-mapa" aria-label="Partes da música"></nav>
   </div>
   <div class="countdown" id="p-contagem" hidden></div>
+  <div class="acorde-pop" id="p-acorde" hidden role="dialog" aria-label="Desenho do acorde"><b id="p-acorde-nome"></b><div id="p-acorde-svg"></div></div>
+  <div class="acordes-painel" id="p-acordes" hidden role="dialog" aria-label="Acordes da música">
+    <div class="ap-head"><b>Acordes desta música</b><button class="btn" id="p-acordes-x">Fechar</button></div>
+    <div class="ap-grid" id="p-acordes-grid"></div>
+  </div>
   <div class="pulso" id="p-pulso" hidden aria-hidden="true"></div>
   <div class="grav" id="p-grav" hidden role="status">
     <span class="rec" aria-hidden="true"></span>
@@ -1466,6 +1496,121 @@ $("foto-ler").onclick = async () => {
 };
 $("foto-parar").onclick = () => ctlFoto?.abort();
 
+/* ---------- Desenho dos acordes no violão, capotraste e simplificação ---------- */
+// Trastes por corda, da 6ª (Mi grave) para a 1ª: -1 = não tocar, 0 = solta.
+const X = -1;
+const ABERTOS = {
+  0: { maj: [X,3,2,0,1,0], "7": [X,3,2,3,1,0], maj7: [X,3,2,0,0,0], add9: [X,3,2,0,3,0], "6": [X,3,2,2,1,0] },
+  2: { maj: [X,X,0,2,3,2], m: [X,X,0,2,3,1], "7": [X,X,0,2,1,2], m7: [X,X,0,2,1,1], maj7: [X,X,0,2,2,2], sus4: [X,X,0,2,3,3], sus2: [X,X,0,2,3,0], "6": [X,X,0,2,0,2] },
+  4: { maj: [0,2,2,1,0,0], m: [0,2,2,0,0,0], "7": [0,2,0,1,0,0], m7: [0,2,2,0,3,0], sus4: [0,2,2,2,0,0], maj7: [0,2,1,1,0,0] },
+  5: { maj7: [X,X,3,2,1,0] },
+  7: { maj: [3,2,0,0,0,3], "7": [3,2,0,0,0,1], maj7: [3,2,0,0,0,2], "6": [3,2,0,0,0,0], sus4: [3,X,0,0,1,3] },
+  9: { maj: [X,0,2,2,2,0], m: [X,0,2,2,1,0], "7": [X,0,2,0,2,0], m7: [X,0,2,0,1,0], maj7: [X,0,2,1,2,0], sus4: [X,0,2,2,3,0], sus2: [X,0,2,2,0,0] },
+  11: { "7": [X,2,1,2,0,2] },
+};
+const BAIXOS = { "D/F#": [2,0,0,2,3,2], "G/B": [X,2,0,0,0,3], "C/E": [0,3,2,0,1,0], "C/G": [3,3,2,0,1,0], "A/C#": [X,4,2,2,2,0], "E/G#": [4,2,2,1,0,0] };
+// Formas móveis (com pestana): relativas à casa da tônica na 6ª corda (forma de Mi) ou na 5ª (forma de Lá).
+const FORMA_MI = { maj: [0,2,2,1,0,0], m: [0,2,2,0,0,0], "7": [0,2,0,1,0,0], m7: [0,2,0,0,0,0], maj7: [0,2,1,1,0,0], sus4: [0,2,2,2,0,0], "6": [0,2,2,1,2,0], m6: [0,2,2,0,2,0], "7sus4": [0,2,0,2,0,0], aug: [0,3,2,1,1,0], "9": [0,2,0,1,0,2], m7b5: [0,1,2,0,3,0], dim7: [0,1,2,0,2,0] };
+const FORMA_LA = { maj: [X,0,2,2,2,0], m: [X,0,2,2,1,0], "7": [X,0,2,0,2,0], m7: [X,0,2,0,1,0], maj7: [X,0,2,1,2,0], sus4: [X,0,2,2,3,0], sus2: [X,0,2,2,0,0], "6": [X,0,2,2,2,2], m6: [X,0,2,2,1,2], "7sus4": [X,0,2,0,3,0], dim: [X,0,1,2,1,X], dim7: [X,0,1,2,1,2], aug: [X,0,3,2,2,1], "9": [X,0,2,4,2,3], add9: [X,0,2,4,2,0], m7b5: [X,0,1,0,1,X] };
+
+function partesAcorde(nome){
+  let n = String(nome).trim();
+  if (/^\(.*\)$/.test(n)) n = n.slice(1, -1);          // acorde inteiro entre parênteses: "(A7)"
+  const m = /^([A-G])(#|b)?([^/]*)(?:\/([A-G](?:#|b)?))?$/.exec(n);
+  if (!m) return null;
+  const idx = IDX[m[1] + (m[2] || "")];
+  return idx === undefined ? null : { idx, raiz: m[1] + (m[2] || ""), suf: m[3] || "", baixo: m[4] || "" };
+}
+function qualidade(suf){
+  const s = suf.replace(/\s/g, "");
+  const tab = { "": "maj", M: "maj", m: "m", "7": "7", m7: "m7", "7M": "maj7", maj7: "maj7", M7: "maj7", "7+": "maj7", sus4: "sus4", "4": "sus4", sus2: "sus2", "2": "sus2", "6": "6", m6: "m6",
+    "9": "9", "7(9)": "9", add9: "add9", "(9)": "add9", m9: "m7", "m7(9)": "m7", dim: "dim", "°": "dim", "º": "dim", dim7: "dim7", "°7": "dim7", "º7": "dim7",
+    aug: "aug", "+": "aug", "5+": "aug", "(#5)": "aug", "m7(5-)": "m7b5", "m7(b5)": "m7b5", m7b5: "m7b5", "ø": "m7b5", "7sus4": "7sus4", "7(4)": "7sus4", "74": "7sus4" };
+  if (tab[s]) return tab[s];
+  if (/^m(?!aj)/.test(s)) return /7/.test(s) ? "m7" : "m";
+  if (/7M|maj7|M7/.test(s)) return "maj7";
+  if (/7/.test(s)) return "7";
+  if (/dim|°|º/.test(s)) return "dim";
+  return "maj";
+}
+function formaDoAcorde(nome){
+  if (BAIXOS[nome]) return BAIXOS[nome];
+  const pa = partesAcorde(nome); if (!pa) return null;
+  const q = qualidade(pa.suf);
+  if (ABERTOS[pa.idx] && ABERTOS[pa.idx][q]) return ABERTOS[pa.idx][q];
+  // Primeiro a forma exata; só se não houver, uma parecida (ex.: dim7 → dim).
+  const parecida = { dim7: "dim", dim: "dim7", m7b5: "m7", "9": "7", add9: "maj", m6: "m", "6": "maj", "7sus4": "7", sus2: "maj", aug: "maj" };
+  for (const qq of [q, parecida[q] || "maj", "maj"]){
+    const cands = [];
+    for (const [forma, corda] of [[FORMA_MI, 4], [FORMA_LA, 9]]){
+      const rel = forma[qq]; if (!rel) continue;
+      for (const r of [(pa.idx - corda + 12) % 12, (pa.idx - corda + 12) % 12 + 12]){
+        const abs = rel.map((x) => x === X ? X : x + r);
+        if (abs.every((x) => x === X || x >= 0) && Math.max(...abs) <= 15){ cands.push(abs); break; }
+      }
+    }
+    cands.sort((a, b) => Math.max(...a) - Math.max(...b));
+    if (cands.length) return cands[0];
+  }
+  return null;
+}
+function diagramaSVG(nome){
+  const f = formaDoAcorde(nome); if (!f) return null;
+  const tocadas = f.filter((x) => x > 0), max = Math.max(0, ...tocadas), min = tocadas.length ? Math.min(...tocadas) : 1;
+  const base = max <= 4 ? 1 : min;
+  const ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 120 140"); svg.setAttribute("class", "diag"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "Desenho do acorde " + nome);
+  const el = (tag, at) => { const e = document.createElementNS(ns, tag); for (const k in at) e.setAttribute(k, at[k]); svg.append(e); return e; };
+  const x0 = 22, dx = 16, y0 = 30, dy = 20;
+  for (let i = 0; i < 6; i++) el("line", { x1: x0 + i * dx, y1: y0, x2: x0 + i * dx, y2: y0 + 5 * dy, class: "dg-l" });
+  for (let j = 0; j <= 5; j++) el("line", { x1: x0, y1: y0 + j * dy, x2: x0 + 5 * dx, y2: y0 + j * dy, class: j === 0 && base === 1 ? "dg-pestana" : "dg-l" });
+  if (base > 1){ const t = el("text", { x: x0 - 6, y: y0 + dy * 0.7, class: "dg-t", "text-anchor": "end" }); t.textContent = base + "ª"; }
+  // pestana: mesma casa na corda mais grave tocada e em várias cordas
+  const contagem = {}; f.forEach((x) => { if (x > 0) contagem[x] = (contagem[x] || 0) + 1; });
+  const casaPestana = +Object.keys(contagem).find((c) => contagem[c] >= 3 && +c === min && f.findIndex((x) => x !== X && x !== 0) === f.indexOf(+c));
+  if (casaPestana && min > 0){
+    const ini = f.indexOf(casaPestana), fim = f.length - 1 - [...f].reverse().findIndex((x) => x >= casaPestana);
+    const y = y0 + (casaPestana - base + 0.5) * dy;
+    el("line", { x1: x0 + ini * dx, y1: y, x2: x0 + fim * dx, y2: y, class: "dg-barra" });
+  }
+  f.forEach((x, i) => {
+    const cx = x0 + i * dx;
+    if (x === X){ const t = el("text", { x: cx, y: y0 - 8, class: "dg-t", "text-anchor": "middle" }); t.textContent = "×"; }
+    else if (x === 0) el("circle", { cx, cy: y0 - 12, r: 4.5, class: "dg-solta" });
+    else el("circle", { cx, cy: y0 + (x - base + 0.5) * dy, r: 6.5, class: "dg-dedo" });
+  });
+  return svg;
+}
+
+// Simplificar: tira extensões e baixo (F7M → F, Bm7(5-) → Bm, G7(13) → G7, D/F# → D).
+function simplificarAcorde(nome){
+  const pa = partesAcorde(nome); if (!pa) return nome;
+  const q = qualidade(pa.suf);
+  const suf = { m: "m", m7: "m", m6: "m", m7b5: "m", "7": "7", "9": "7", "7sus4": "7", dim: "dim", dim7: "dim", aug: "aug" }[q] || "";
+  return pa.raiz + suf;
+}
+// Troca acordes de uma linha mantendo cada um na sua coluna.
+function mapearLinha(linha, fn){
+  let out = ""; const re = /\S+/g; let m;
+  while ((m = re.exec(linha))){
+    const tok = ehAcorde(m[0]) ? fn(m[0]) : m[0];
+    let col = m.index;
+    if (out.length && out.length >= col) col = out.length + 1;
+    out += " ".repeat(col - out.length) + tok;
+  }
+  return out;
+}
+// Tons fáceis no violão, do mais fácil para o menos.
+const FACEIS_MAIOR = [7, 0, 2, 9, 4], FACEIS_MENOR = [9, 4, 2];
+function sugestaoCapo(tomSoando){
+  const pa = partesAcorde(tomSoando); if (!pa) return null;
+  const menor = /^m(?!aj)/.test(pa.suf), lista = menor ? FACEIS_MENOR : FACEIS_MAIOR;
+  const opcoes = [];
+  for (let c = 0; c <= 7; c++){ const forma = (pa.idx - c + 12) % 12; const r = lista.indexOf(forma); if (r >= 0) opcoes.push({ capo: c, forma: SUST[forma] + (menor ? "m" : ""), nota: c + r * 1.5 }); }
+  opcoes.sort((a, b) => a.nota - b.nota);
+  return opcoes[0] || null;
+}
+
 /* ---------- Modo palco ---------- */
 // Dois modos de rolagem:
 //  "salto"   cada parte aparece uma vez (como na folha) e a tela SALTA até a parte certa
@@ -1477,12 +1622,25 @@ const corpo = $("p-corpo");
 let modoPreferido = "salto";
 try { modoPreferido = localStorage.getItem("modo-rolagem") || "salto"; } catch {}
 
+// Quanto transpor as formas: tom escolhido + diferença entre o capo da cifra e o capo usado agora.
+function deslocamento(){ return (P.transp || 0) + (P.m.capo || 0) - (P.capoUso ?? (P.m.capo || 0)); }
+function acordeExibido(ch, bemol){ const t = transporAcorde(ch, deslocamento(), bemol); return P.simplificar ? simplificarAcorde(t) : t; }
+function linhaAcordes(d, raw, bemol){
+  const linha = mapearLinha(raw, (ch) => acordeExibido(ch, bemol));
+  const re = /\S+/g; let m, ult = 0;
+  while ((m = re.exec(linha))){
+    if (m.index > ult) d.append(linha.slice(ult, m.index));
+    if (ehAcorde(m[0])){ const sp = document.createElement("span"); sp.className = "ac"; sp.dataset.ac = m[0]; sp.textContent = m[0]; d.append(sp); }
+    else d.append(m[0]);
+    ult = m.index + m[0].length;
+  }
+}
 function linhaPalco(raw, bemol){
   const d = document.createElement("div"); d.className = "l";
   if (typeof raw === "object"){ d.className = "rep"; d.textContent = "↻ de novo · " + raw.marca + "ª vez"; return d; }
   const tr = raw.trim();
   if (/^\[[^\]]+\]$/.test(tr) && !ehAcorde(tr.slice(1,-1))){ const s = document.createElement("span"); s.className = "s"; s.textContent = tr.slice(1,-1); d.append(s); }
-  else if (ehLinhaAcordes(raw)){ d.classList.add("c"); d.textContent = transporLinha(raw, P.transp, bemol); }
+  else if (ehLinhaAcordes(raw)){ d.classList.add("c"); linhaAcordes(d, raw, bemol); }
   else if (/^\s*[eBGDAE]\s*[|:]/.test(raw)){ d.classList.add("t"); d.textContent = raw; }
   else d.textContent = raw;
   return d;
@@ -1496,7 +1654,7 @@ function cabecalhoParte(nome, extra){
 }
 function renderCifra(){
   const m = P.m, el = $("p-cifra"); el.textContent = "";
-  const bemol = usarBemol(m.tom, P.transp, m.texto || "");
+  const bemol = usarBemol(m.tom, deslocamento(), m.texto || "");
   for (const l of P.est.preambulo) el.append(linhaPalco(l, bemol));
   if (P.modo === "salto"){
     // Cada parte uma vez, na ordem em que está escrita.
@@ -1523,7 +1681,10 @@ function renderCifra(){
   }
   // No modo Saltar o fim da folha não é o fim da música (o roteiro pode voltar ao refrão).
   if (P.modo !== "salto" || !temPartes()){ const fim = document.createElement("div"); fim.className = "end"; fim.textContent = "fim"; el.append(fim); }
-  $("p-tom").textContent = transporTom(m.tom, P.transp) || (P.transp ? (P.transp > 0 ? "+" : "") + P.transp : "tom");
+  // Tom que soa (forma + capo); o capo mostra as formas usadas.
+  const soa = transporTom(m.tom, (P.transp || 0) + (m.capo || 0));
+  $("p-tom").textContent = soa || (P.transp ? (P.transp > 0 ? "+" : "") + P.transp : "tom");
+  atualizarCapo(soa, bemol);
   renderMapa();
   medirUI();
   aplicarFonte();
@@ -1803,6 +1964,8 @@ function carregarNoPalco(i){
   P.i = i; P.m = estado.musicas.get(P.fila[i]);
   if (!P.m) return;
   P.vel = P.m.velocidade || 1; P.transp = P.m.transp || 0; P.fonte = P.m.fonte || 0; P.alterado = false;
+  P.capoUso = P.m.capoUso ?? (P.m.capo || 0); P.simplificar = !!P.m.simplificar;
+  $("p-acordes").hidden = true; $("p-acorde").hidden = true;
   $("p-titulo").textContent = P.m.titulo;
   const pos = P.fila.length > 1 ? `${i+1} de ${P.fila.length} · ` : "";
   $("p-sub").textContent = [pos.replace(/ · $/, ""), P.m.artista || "", P.m.capo ? "Capo " + P.m.capo + "ª casa" : "", P.m.tempos ? "tempo ensinado" : P.m.duracao ? "" : "sem duração: usando 3:00"].filter(Boolean).join(" · ");
@@ -1825,7 +1988,7 @@ function abrirPalco(fila, i, voltarEditor = false){
 }
 function salvarAjustesPalco(){
   if (P.m && P.alterado){
-    const m = { ...P.m, velocidade: Math.round(P.vel*100)/100, transp: P.transp, fonte: P.fonte };
+    const m = { ...P.m, velocidade: Math.round(P.vel*100)/100, transp: P.transp, fonte: P.fonte, capoUso: P.capoUso, simplificar: !!P.simplificar };
     store.salvarMusica(m);
   }
   P.alterado = false;
@@ -1888,6 +2051,50 @@ $("p-tom-mais").onclick = () => { P.transp = (P.transp + 1) % 12; P.alterado = t
 $("p-fonte-menos").onclick = () => { P.fonte = Math.max(12, (P.fonte || fonteAuto()) - 2); P.alterado = true; aplicarFonte(); };
 $("p-fonte-mais").onclick = () => { P.fonte = Math.min(60, (P.fonte || fonteAuto()) + 2); P.alterado = true; aplicarFonte(); };
 window.addEventListener("resize", () => { if ($("palco").hidden) return; medirUI(); if (!P.fonte) aplicarFonte(); else calcularPassos(); });
+
+/* ---------- Palco: capo, simplificar e desenho dos acordes ---------- */
+function atualizarCapo(soa, bemol){
+  const uso = P.capoUso ?? (P.m.capo || 0);
+  const forma = transporTom(P.m.tom, deslocamento());
+  $("p-capo").textContent = "Capo " + uso + (forma && uso ? " · " + forma : "");
+  $("p-simplificar").setAttribute("aria-pressed", !!P.simplificar);
+  const sug = soa ? sugestaoCapo(soa) : null;
+  const atualFacil = sug && forma && partesAcorde(forma) && (/^m(?!aj)/.test(partesAcorde(forma).suf) ? FACEIS_MENOR : FACEIS_MAIOR).includes(partesAcorde(forma).idx);
+  const b = $("p-capo-facil");
+  if (sug && !atualFacil && sug.capo !== uso){ b.hidden = false; b.textContent = "Capo fácil: " + (sug.capo ? sug.capo + "ª → formas de " : "sem capo → ") + sug.forma; b.dataset.capo = sug.capo; }
+  else b.hidden = true;
+}
+function mudarCapo(v){
+  P.capoUso = Math.max(0, Math.min(9, v)); P.alterado = true;
+  const top = corpo.scrollTop; renderCifra(); corpo.scrollTop = top; P.setY = top; P.pos = top;
+}
+$("p-capo-menos").onclick = () => mudarCapo((P.capoUso ?? (P.m.capo || 0)) - 1);
+$("p-capo-mais").onclick = () => mudarCapo((P.capoUso ?? (P.m.capo || 0)) + 1);
+$("p-capo-facil").onclick = () => { mudarCapo(+$("p-capo-facil").dataset.capo); toast("Capo na " + P.capoUso + "ª casa: os acordes mudaram de forma, o tom continua o mesmo."); };
+$("p-simplificar").onclick = () => { P.simplificar = !P.simplificar; P.alterado = true; const top = corpo.scrollTop; renderCifra(); corpo.scrollTop = top; P.setY = top; P.pos = top; };
+let acordeT = null;
+function mostrarAcorde(nome){
+  const svg = diagramaSVG(nome), caixa = $("p-acorde-svg"); caixa.textContent = "";
+  $("p-acorde-nome").textContent = nome;
+  if (svg) caixa.append(svg); else { const sm = document.createElement("small"); sm.textContent = "Sem desenho para este acorde"; caixa.append(sm); }
+  $("p-acorde").hidden = false;
+  clearTimeout(acordeT); acordeT = setTimeout(() => { $("p-acorde").hidden = true; }, 3500);
+}
+function abrirPainelAcordes(){
+  const grid = $("p-acordes-grid"); grid.textContent = "";
+  const vistos = [...new Set([...$("p-cifra").querySelectorAll(".ac")].map((x) => x.dataset.ac))];
+  for (const nome of vistos){
+    const item = document.createElement("div"); item.className = "ap-item";
+    const b = document.createElement("b"); b.textContent = nome; item.append(b);
+    const svg = diagramaSVG(nome);
+    if (svg) item.append(svg); else { const sm = document.createElement("small"); sm.textContent = "Sem desenho"; item.append(sm); }
+    grid.append(item);
+  }
+  if (!vistos.length){ const sm = document.createElement("p"); sm.className = "hint"; sm.textContent = "Esta cifra não tem acordes reconhecidos."; grid.append(sm); }
+  $("p-acordes").hidden = false;
+}
+$("p-acordes-btn").onclick = abrirPainelAcordes;
+$("p-acordes-x").onclick = () => { $("p-acordes").hidden = true; };
 
 /* ---------- Contagem, pulso do metrônomo e som ---------- */
 let audioCtx = null;
@@ -2028,6 +2235,8 @@ corpo.addEventListener("pointerup", (e) => {
   soltarToque();
   const t = toque; toque = null;
   if (!t || P.travado) return;
+  const ac = e.target.closest ? e.target.closest(".ac") : null;
+  if (ac && Math.abs(e.clientX - t.x) < 12 && Math.abs(e.clientY - t.y) < 12){ mostrarAcorde(ac.dataset.ac); return; }
   const moveu = Math.abs(e.clientX - t.x) > 12 || Math.abs(e.clientY - t.y) > 12 || Math.abs(corpo.scrollTop - t.scroll) > 6;
   if (moveu || Date.now() - t.t > 600) return;
   const r = corpo.getBoundingClientRect(), f = (e.clientY - r.top) / r.height;
@@ -2346,7 +2555,7 @@ const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platfo
 let dicaVista = false; try { dicaVista = localStorage.getItem("dica-ios") === "1"; } catch {}
 if (ehIOS && !instalado && !dicaVista && !dentroDeFrame) $("ios-dica").hidden = false;
 $("ios-fechar").onclick = () => { $("ios-dica").hidden = true; try { localStorage.setItem("dica-ios", "1"); } catch {} };
-const VERSAO_APP = "v11 · transição";
+const VERSAO_APP = "v12 · acordes";
 if ("serviceWorker" in navigator && location.protocol === "https:" && !dentroDeFrame) {
   const tinhaControle = !!navigator.serviceWorker.controller;
   let recarregou = false;
