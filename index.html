@@ -304,6 +304,10 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 .pedal-row .btn{min-height:36px;padding:6px 12px;font-size:13px}
 .sheet-music.duas{column-count:2;column-gap:48px}
 .sheet-music.duas .bloco{break-inside:avoid}
+.sala-cod{font-family:var(--font-mono);font-size:24px;letter-spacing:.12em;color:var(--accent)}
+.sala-selo{position:absolute;z-index:2;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 10px);font-size:12px;font-weight:700;color:var(--accent-ink);background:var(--accent);border-radius:999px;padding:3px 10px;pointer-events:none;opacity:.9}
+.stage:not(.limpo) .sala-selo{bottom:calc(env(safe-area-inset-bottom,0px) + 96px)}
+#sala-painel{margin-top:24px}
 .tempos-info{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:13px}
 .tempos-info:empty{display:none}
 .linkbtn{background:none;border:0;color:var(--accent);font-weight:600;font-size:13px;padding:4px}
@@ -395,6 +399,22 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
     <ol class="list" id="setlist"></ol>
     <p class="hint" style="margin-top:14px">Arraste pela alça <b>⋮⋮</b> para mudar a ordem. As músicas tocadas ficam marcadas e o show continua da próxima.</p>
     <button class="linkbtn" id="btn-limpar-set" type="button" style="margin-top:6px;color:var(--live)">Limpar setlist</button>
+    <section class="painel" id="sala-painel">
+      <h3>Tocar junto</h3>
+      <p class="hint" style="margin:0">Um aparelho comanda (play, partes, repetir, próxima música) e os outros acompanham na hora. Cada um continua com seu tom, capo e tamanho de letra.</p>
+      <div class="notice" id="sala-indisp" hidden>Tocar junto funciona no app instalado (szadil763.github.io/cifras-show), com internet.</div>
+      <div class="form" id="sala-fora" style="margin:0">
+        <button class="btn primary" id="sala-criar" type="button" style="justify-self:start">Criar sala (eu comando)</button>
+        <label>Ou entre na sala de outro aparelho
+          <span class="dur-field"><input type="text" id="sala-codigo" maxlength="6" autocapitalize="characters" autocomplete="off" placeholder="Código de 6 letras"><button class="btn" id="sala-entrar" type="button">Entrar</button></span>
+        </label>
+      </div>
+      <div class="form" id="sala-dentro" style="margin:0" hidden>
+        <p style="margin:0">Sala <b class="sala-cod" id="sala-cod"></b></p>
+        <p class="hint" style="margin:0" id="sala-status"></p>
+        <button class="btn danger" id="sala-sair" type="button" style="justify-self:start">Sair da sala</button>
+      </div>
+    </section>
   </section>
 </main>
 
@@ -599,6 +619,7 @@ textarea{font-family:var(--font-mono);font-size:14px;line-height:1.5;min-height:
 <div class="stage" id="palco" hidden>
   <div class="progress"><i id="p-prog"></i></div>
   <div class="stage-body" id="p-corpo"><div class="sheet-music" id="p-cifra"></div></div>
+  <div class="sala-selo" id="p-sala" hidden></div>
   <div class="hud" id="p-hud" aria-hidden="true"><span id="p-hud-parte"></span><span id="p-hud-tempo"></span></div>
   <div class="stage-ui stage-ui-top" id="p-ui-top">
     <div class="stage-top">
@@ -1865,6 +1886,7 @@ function marcarParteAtual(){
 }
 function irParaParte(i){
   if (P.gravando) return;
+  if (bloqueadoSeguindo()) return;
   P.intro = 0; P.contagem = null; $("p-contagem").hidden = true; $("p-proxima").hidden = true; P.acabou = false;
   if (usaPassos()){
     P.passo = i; P.tPasso = 0;
@@ -1879,7 +1901,7 @@ function irParaParte(i){
   }
 }
 function repetirParte(){
-  if (!temPartes()) return;
+  if (!temPartes() || bloqueadoSeguindo()) return;
   const i = parteAtual(), item = P.seq[i]; if (!item?.key) return;
   // Tempo extra proporcional ao tamanho da parte, para a velocidade não mudar.
   const total = P.seq.reduce((n, it) => n + linhasDaParte(it.key), 0);
@@ -2070,7 +2092,7 @@ function carregarNoPalco(i){
   pararTransicao();
   if (P.m && P.decorrido > 20) marcarTocada(P.m.id);
   salvarAjustesPalco();
-  P.i = i; P.m = estado.musicas.get(P.fila[i]);
+  P.i = i; P.m = obterMusica(P.fila[i]);
   if (!P.m) return;
   P.vel = P.m.velocidade || 1; P.transp = P.m.transp || 0; P.fonte = P.m.fonte || 0; P.alterado = false;
   P.capoUso = P.m.capoUso ?? (P.m.capo || 0); P.simplificar = !!P.m.simplificar;
@@ -2096,7 +2118,7 @@ function abrirPalco(fila, i, voltarEditor = false){
   pedirTelaLigada();
 }
 function salvarAjustesPalco(){
-  if (P.m && P.alterado){
+  if (P.m && P.alterado && !(seguindo() && !estado.musicas.has(P.m.id))){
     const m = { ...P.m, velocidade: Math.round(P.vel*100)/100, transp: P.transp, fonte: P.fonte, capoUso: P.capoUso, simplificar: !!P.simplificar };
     store.salvarMusica(m);
   }
@@ -2126,6 +2148,7 @@ function ajustarVel(d){ P.vel = Math.max(0.3, Math.min(3, Math.round((P.vel + d)
 // Tocando: pulo imediato (a rolagem automática continua dali). Parado: pulo suave.
 function rolarPara(y){ if (P.tocando) corpo.scrollTop = y; else corpo.scrollTo({ top: y, behavior: "smooth" }); }
 function rolarTela(dir){
+  if (bloqueadoSeguindo()) return;
   if (P.gravando){ if (dir > 0) marcarMudanca(); else toast("Gravando: só dá para avançar. Para recomeçar, toque em Cancelar."); return; }
   if (P.modo === "salto" && temPartes()){
     // Pedal: avança ou volta uma parte do roteiro.
@@ -2135,6 +2158,7 @@ function rolarTela(dir){
   P.pos = Math.max(0, corpo.scrollTop + dir * corpo.clientHeight * 0.5); rolarPara(P.pos);
 }
 function alternar(){
+  if (bloqueadoSeguindo()) return;
   desbloquearAudio();
   const noFim = usaPassos() ? P.acabou : P.pos >= corpo.scrollHeight - corpo.clientHeight * 1.55 - 1;
   if (!P.tocando && noFim) reiniciarMusica();
@@ -2153,8 +2177,8 @@ corpo.addEventListener("scroll", () => {
 $("p-sair").onclick = sairPalco;
 $("p-lento").onclick = () => ajustarVel(-0.1);
 $("p-rapido").onclick = () => ajustarVel(0.1);
-$("p-ant").onclick = () => { if (P.i > 0) carregarNoPalco(P.i - 1); };
-$("p-prox").onclick = () => { if (P.i < P.fila.length - 1) carregarNoPalco(P.i + 1); };
+$("p-ant").onclick = () => { if (!bloqueadoSeguindo() && P.i > 0) carregarNoPalco(P.i - 1); };
+$("p-prox").onclick = () => { if (!bloqueadoSeguindo() && P.i < P.fila.length - 1) carregarNoPalco(P.i + 1); };
 $("p-proxima-ir").onclick = () => { pararTransicao(); carregarNoPalco(P.i + 1); alternar(); };
 $("p-tom-menos").onclick = () => { P.transp = (P.transp - 1) % 12; P.alterado = true; renderCifra(); };
 $("p-tom-mais").onclick = () => { P.transp = (P.transp + 1) % 12; P.alterado = true; renderCifra(); };
@@ -2267,6 +2291,7 @@ function pulsar(){
 
 /* ---------- Ensinar o tempo: o músico marca cada mudança de parte ---------- */
 function iniciarGravacao(){
+  if (bloqueadoSeguindo()) return;
   desbloquearAudio();
   setTocando(false);
   P.gravando = { duracoes: [], inicio: 0 };
@@ -2540,6 +2565,128 @@ document.addEventListener("keydown", (e) => {
   toast("“" + nomeAcao + "” agora no botão " + nomeTecla(e.key));
 }, true);
 $("pedal-padrao").onclick = () => { definirPref("teclas", null); definindoTecla = null; renderPedal(); toast("Pedal e teclado voltaram ao padrão"); };
+
+/* ---------- Tocar junto: um aparelho comanda, os outros acompanham ---------- */
+const sala = { canal: null, codigo: "", papel: "", conectados: 0, ok: false, t: null, ultimaAss: "", ultimoEnvio: 0, ultimaMsg: 0, contagemRemota: false };
+const salaMusicas = new Map();
+// Seguindo uma sala, vale a versão do líder; fora dela, a do seu repertório.
+function obterMusica(id){ return (seguindo() && salaMusicas.get(id)) || estado.musicas.get(id) || salaMusicas.get(id); }
+function bloqueadoSeguindo(){ if (!seguindo()) return false; toast("Quem comanda é o aparelho que criou a sala. Você pode mudar tom, capo e letra."); return true; }
+function seguindo(){ return sala.papel === "seguidor" && !!sala.canal; }
+function gerarCodigo(){
+  const letras = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", r = crypto.getRandomValues(new Uint8Array(6));
+  let c = ""; for (const x of r) c += letras[x % letras.length]; return c;
+}
+function entrarSala(codigo, papel){
+  if (!nuvem.sb){ toast("Tocar junto precisa de internet e do app instalado (não funciona dentro do claude.ai)."); return; }
+  sairSala(true);
+  sala.codigo = codigo; sala.papel = papel; sala.ok = false;
+  const ch = nuvem.sb.channel("cifra-sala-" + codigo, { config: { broadcast: { self: false }, presence: { key: papel + "-" + Math.random().toString(36).slice(2, 8) } } });
+  ch.on("broadcast", { event: "estado" }, (msg) => receberEstado(msg && msg.payload));
+  ch.on("broadcast", { event: "pedir" }, () => { if (sala.papel === "lider") enviarEstado(true); });
+  ch.on("presence", { event: "sync" }, () => { try { sala.conectados = Object.keys(ch.presenceState()).length; } catch {} renderSala(); });
+  ch.subscribe(async (status) => {
+    if (status === "SUBSCRIBED"){
+      sala.ok = true;
+      try { await ch.track({ papel }); } catch {}
+      if (papel === "seguidor") ch.send({ type: "broadcast", event: "pedir", payload: {} });
+      else enviarEstado(true);
+    } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") sala.ok = false;
+    renderSala();
+  });
+  sala.canal = ch;
+  if (papel === "lider") sala.t = setInterval(() => enviarEstado(false), 250);
+  renderSala();
+}
+function sairSala(silencioso){
+  clearInterval(sala.t);
+  if (sala.canal){ try { nuvem.sb.removeChannel(sala.canal); } catch {} }
+  Object.assign(sala, { canal: null, codigo: "", papel: "", conectados: 0, ok: false, t: null, ultimaAss: "" });
+  renderSala();
+  if (!silencioso) toast("Você saiu da sala");
+}
+function estadoAtual(){
+  if ($("palco").hidden || !P.m) return { aberto: false };
+  const m = P.m, fim = corpo.scrollHeight - corpo.clientHeight * 1.55;
+  const c = P.contagem;
+  return {
+    aberto: true,
+    musica: { id: m.id, titulo: m.titulo, artista: m.artista, tom: m.tom, texto: m.texto, roteiro: m.roteiro, tempos: m.tempos, duracao: m.duracao, intro: m.intro, bpm: m.bpm, compasso: m.compasso, capo: m.capo, nota: m.nota, atualizada: m.atualizada },
+    seq: P.seq.map((x) => x.key), tocando: P.tocando, passo: P.passo, tPasso: P.tPasso, decorrido: P.decorrido, intro: P.intro, vel: P.vel, durExtra: P.durExtra,
+    contagem: c ? (c.regressiva ? c.total - Math.max(0, c.n) : Math.max(0, c.n) + 1) : 0,
+    frac: fim > 0 ? corpo.scrollTop / fim : 0,
+  };
+}
+function enviarEstado(forcar){
+  if (!sala.canal || sala.papel !== "lider" || !sala.ok) return;
+  const e = estadoAtual();
+  const ass = JSON.stringify([e.aberto, e.musica && e.musica.id, e.musica && e.musica.atualizada, e.tocando, e.passo, e.seq && e.seq.length, e.vel, e.contagem]);
+  if (!forcar && ass === sala.ultimaAss && Date.now() - sala.ultimoEnvio < 1500) return;
+  sala.ultimaAss = ass; sala.ultimoEnvio = Date.now();
+  try { const r = sala.canal.send({ type: "broadcast", event: "estado", payload: e }); if (r && r.catch) r.catch(() => {}); } catch {}
+}
+function receberEstado(e){
+  if (sala.papel !== "seguidor" || !e || typeof e !== "object") return;
+  sala.ultimaMsg = Date.now(); renderSala();
+  if (!e.aberto || !e.musica || typeof e.musica.texto !== "string") return;
+  const m = e.musica, local = estado.musicas.get(m.id);
+  // Letra, roteiro e tempos vêm do líder; tom, capo usado e tamanho da letra continuam os seus.
+  salaMusicas.set(m.id, { ...(local || {}), ...m, transp: (local && local.transp) || 0, fonte: (local && local.fonte) || 0, capoUso: local && local.capoUso, velocidade: e.vel || 1 });
+  if ($("palco").hidden || !P.m || P.m.id !== m.id || P.m.atualizada !== m.atualizada){
+    if ($("palco").hidden) abrirPalco([m.id], 0); else { P.fila = [m.id]; carregarNoPalco(0); }
+  }
+  P.vel = e.vel || 1;
+  // Repetições extras que o líder pediu ("Repetir")
+  const chaves = Array.isArray(e.seq) ? e.seq : [];
+  if (chaves.length && chaves.join("\u0001") !== P.seq.map((x) => x.key).join("\u0001")){
+    const base = montarSequencia(P.m).seq.map((x) => x.key); let j = 0;
+    P.seq = chaves.map((k) => { if (k === base[j]){ j++; return { key: k }; } return { key: k, extra: true }; });
+    if (P.modo === "salto") renderMapa(); else { const top = corpo.scrollTop; renderCifra(); corpo.scrollTop = top; P.setY = top; }
+    calcularPassos();
+  }
+  P.durExtra = +e.durExtra || 0;
+  P.decorrido = +e.decorrido || 0;
+  P.intro = +e.intro || 0;
+  // Contagem do líder aparece aqui também
+  const cont = $("p-contagem");
+  if (e.contagem){ cont.hidden = false; cont.textContent = String(e.contagem); sala.contagemRemota = true; }
+  else if (sala.contagemRemota){ cont.hidden = true; sala.contagemRemota = false; }
+  if (usaPassos()){
+    const passo = Math.max(0, Math.min(P.seq.length - 1, +e.passo || 0));
+    if (passo !== P.passo){ P.passo = passo; P.tPasso = +e.tPasso || 0; P.anim = { from: corpo.scrollTop, t: 0 }; P.acabou = false; marcarParteAtual(); }
+    else if (Math.abs((+e.tPasso || 0) - P.tPasso) > 0.5) P.tPasso = +e.tPasso || 0;
+  } else {
+    const fim = corpo.scrollHeight - corpo.clientHeight * 1.55;
+    if (fim > 0 && Math.abs(corpo.scrollTop - e.frac * fim) > 40){ corpo.scrollTop = e.frac * fim; P.pos = corpo.scrollTop; P.setY = P.pos; }
+  }
+  const tocar = !!e.tocando && !e.contagem;
+  if (tocar !== P.tocando){ P.contagem = null; setTocando(tocar); }
+  atualizarRelogio();
+}
+function renderSala(){
+  const dentro = !!sala.canal;
+  $("sala-fora").hidden = dentro; $("sala-dentro").hidden = !dentro;
+  $("sala-indisp").hidden = !nuvem.indisponivel;
+  if (nuvem.indisponivel){ $("sala-fora").hidden = true; }
+  const badge = $("p-sala");
+  if (!dentro){ badge.hidden = true; return; }
+  $("sala-cod").textContent = sala.codigo;
+  const outros = Math.max(0, sala.conectados - 1);
+  const st = !sala.ok ? "conectando…" : sala.papel === "lider"
+    ? "você comanda · " + (outros ? outros + " aparelho" + (outros > 1 ? "s" : "") + " acompanhando" : "esperando os outros entrarem")
+    : (Date.now() - sala.ultimaMsg < 6000 ? "acompanhando o líder" : "esperando o líder abrir uma música");
+  $("sala-status").textContent = st;
+  badge.hidden = false;
+  badge.textContent = (sala.papel === "lider" ? "Comandando" : "Seguindo") + " · sala " + sala.codigo + (sala.papel === "lider" && outros ? " · " + outros + " junto" : "");
+}
+$("sala-criar").onclick = () => { entrarSala(gerarCodigo(), "lider"); toast("Sala criada. Passe o código para quem vai tocar junto."); };
+$("sala-entrar").onclick = () => {
+  const c = $("sala-codigo").value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (c.length !== 6){ toast("O código da sala tem 6 letras e números."); $("sala-codigo").focus(); return; }
+  entrarSala(c, "seguidor"); toast("Entrando na sala " + c + "…");
+};
+$("sala-sair").onclick = () => sairSala();
+setInterval(() => { if (sala.canal) renderSala(); }, 3000);
 
 /* ---------- Preferências do app ---------- */
 const CORES = [
@@ -2823,7 +2970,7 @@ const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platfo
 let dicaVista = false; try { dicaVista = localStorage.getItem("dica-ios") === "1"; } catch {}
 if (ehIOS && !instalado && !dicaVista && !dentroDeFrame) $("ios-dica").hidden = false;
 $("ios-fechar").onclick = () => { $("ios-dica").hidden = true; try { localStorage.setItem("dica-ios", "1"); } catch {} };
-const VERSAO_APP = "v13 · setlist";
+const VERSAO_APP = "v14 · banda";
 if ("serviceWorker" in navigator && location.protocol === "https:" && !dentroDeFrame) {
   const tinhaControle = !!navigator.serviceWorker.controller;
   let recarregou = false;
@@ -2849,6 +2996,7 @@ store.iniciar();
 iniciarSample();
 receberCompartilhado();
 renderIntervalo();
+renderSala();
 })();
 </script>
 
